@@ -68,7 +68,7 @@ cd ..
 
 # Tag and push CKAN app to ECR
 echo "Tagging and pushing CKAN app to ECR..."
-docker tag cba_gestionabierta:$ENVIRONMENT $ECR_REGISTRY/ckan-app:$ENVIRONMENT
+docker tag ckan_aws:$ENVIRONMENT $ECR_REGISTRY/ckan-app:$ENVIRONMENT
 docker push $ECR_REGISTRY/ckan-app:$ENVIRONMENT
 
 # Build and push other Docker images to ECR

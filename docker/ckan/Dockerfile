@@ -5,7 +5,7 @@ ARG TZ
 ARG ENV_NAME
 
 # Internals, you probably don't need to change these
-ENV APP_DIR=/app/cba_gestionabierta
+ENV APP_DIR=/app/ckan_aws
 ENV CKAN_INI=${APP_DIR}/ckan.ini
 ENV ENV_NAME=${ENV_NAME}
 

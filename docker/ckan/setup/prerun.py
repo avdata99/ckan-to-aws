@@ -12,7 +12,7 @@ except ImportError:
 import time
 import re
 
-ckan_ini = os.environ.get("CKAN_INI", "/app/cba_gestionabierta/ckan.ini")
+ckan_ini = os.environ.get("CKAN_INI", "/app/ckan_aws/ckan.ini")
 
 RETRY = 5
 

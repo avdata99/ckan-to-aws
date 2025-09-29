@@ -9,7 +9,7 @@ build:
 		--file Dockerfile \
 		--build-arg ENV_NAME=${ENV_NAME} \
 		--build-arg TZ=${TZ} \
-		-t cba_gestionabierta:${ENV_NAME} .
-	echo "Build done cba_gestionabierta:${ENV_NAME}"
+		-t ckan_aws:${ENV_NAME} .
+	echo "Build done ckan_aws:${ENV_NAME}"
 	BUILDKIT_PROGRESS=plain docker compose build postgresql_cba
 	echo "Build done postgresql_cba"

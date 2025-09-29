@@ -35,7 +35,7 @@ DATAPUSHER_TOKEN=$(ckan user token add default datapusher_multi expires_in=365 u
 ckan config-tool ckan.ini "ckan.datapusher.api_token=${DATAPUSHER_TOKEN}"
 ckan config-tool ckan.ini "ckanext.datapusher_plus.api_token=${DATAPUSHER_TOKEN}"
 
-ckan config-tool ckan.ini "ckanext.cba_gestionabierta.version=${CKAN_APP_VERSION}"
+ckan config-tool ckan.ini "ckanext.ckan_aws.version=${CKAN_APP_VERSION}"
 
 # For all environments, check if the sysadmin user exists and create it if not
 echo "Checking if sysadmin user '$CKAN_SYSADMIN_USER' exists"
