@@ -7,6 +7,7 @@ if [ -f .env ]; then
     export $(grep -v '^#' .env | xargs)
 else
     # define env before running the script
+    echo "No .env file found. Reading environment variables from the shell environment ..."
 fi
 
 # Validate required environment variables
@@ -58,29 +59,35 @@ for repo in ckan-app ckan-solr ckan-redis; do
     aws ecr create-repository $AWS_PROFILE_OPTION --repository-name $repo --region $CDK_CONTEXT_region
 done
 
-# Build main CKAN application using Makefile
+# Build and push other Docker images to ECR
+echo "Building and pushing support images to ECR..."
+cd ../docker
+# Build and push Solr image
+make build-solr
+# now we have the local image solr_aws:latest
+# Push it to ECR
+docker tag solr_aws:latest $ECR_REGISTRY/ckan-solr:$ENVIRONMENT
+docker push $ECR_REGISTRY/ckan-solr:$ENVIRONMENT
+
+# Build and push Redis image
+make build-redis
+# now we have the local image redis_aws:latest
+# Push it to ECR
+docker tag redis_aws:latest $ECR_REGISTRY/ckan-redis:$ENVIRONMENT
+docker push $ECR_REGISTRY/ckan-redis:$ENVIRONMENT
+
 echo "Building main CKAN application..."
-cd ../docker/ckan
+
+
+# Build main CKAN application using Makefile
 # Load container env from docker/ckan/files/env/base.env + docker/ckan/files/env/ENV_NAME.env
-set -o allexport; source files/env/base.env; source files/env/$ENV_NAME.env; set +o allexport
-make build ENV_NAME=$ENVIRONMENT
-cd ..
+set -o allexport; source ckan/files/env/base.env; source ckan/files/env/$ENV_NAME.env; set +o allexport
+make build-ckan ENV_NAME=$ENVIRONMENT
 
 # Tag and push CKAN app to ECR
 echo "Tagging and pushing CKAN app to ECR..."
 docker tag ckan_aws:$ENVIRONMENT $ECR_REGISTRY/ckan-app:$ENVIRONMENT
 docker push $ECR_REGISTRY/ckan-app:$ENVIRONMENT
-
-# Build and push other Docker images to ECR
-echo "Building and pushing support images to ECR..."
-
-# Build and push Solr image
-docker build -t $ECR_REGISTRY/ckan-solr:$ENVIRONMENT ./docker/solr
-docker push $ECR_REGISTRY/ckan-solr:$ENVIRONMENT
-
-# Build and push Redis image
-docker build -t $ECR_REGISTRY/ckan-redis:$ENVIRONMENT ./docker/redis
-docker push $ECR_REGISTRY/ckan-redis:$ENVIRONMENT
 
 echo "All Docker images pushed to ECR successfully!"
 

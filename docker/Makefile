@@ -1,9 +1,8 @@
 .PHONY: build
 
-build:
-	@if [ ! -f ckan/files/env/local.env ]; then mkdir -p ckan/files/env && touch ckan/files/env/local.env; fi
+build-ckan:
 	$(eval TZ ?= America/Argentina/Cordoba)
-	$(eval ENV_NAME ?= local)
+	$(eval ENV_NAME ?= dev)
 	cd ckan && \
 	BUILDKIT_PROGRESS=plain docker build \
 		--file Dockerfile \
@@ -11,5 +10,20 @@ build:
 		--build-arg TZ=${TZ} \
 		-t ckan_aws:${ENV_NAME} .
 	echo "Build done ckan_aws:${ENV_NAME}"
-	BUILDKIT_PROGRESS=plain docker compose build postgresql_cba
-	echo "Build done postgresql_cba"
+	cd ..
+
+build-solr:
+	cd solr && \
+	docker build \
+		--file Dockerfile \
+		-t solr_aws:latest .
+	echo "Build done solr_aws:latest"
+	cd ..
+
+build-redis:
+	cd redis && \
+	docker build \
+		--file Dockerfile \
+		-t redis_aws:latest .
+	echo "Build done [Valkey] redis_aws:latest"
+	cd ..

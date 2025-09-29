@@ -10,8 +10,6 @@ echo "Installing Extensions"
 python -m venv ${APP_DIR}/venv
 source ${APP_DIR}/venv/bin/activate
 
-# Si estamos en el entorno de desarrollo ya esta montada la carpeta de la extension CBA-CKAN
-
 echo "Installing ckanext-pdfview"
 pip install -q git+https://github.com/ckan/ckanext-pdfview.git#egg=ckanext-pdfview
 

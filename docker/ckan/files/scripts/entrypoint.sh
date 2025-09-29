@@ -68,11 +68,11 @@ echo "************************************************"
 echo "************************************************"
 echo "*********** CKAN is ready to use ***************"
 echo "************ at $CKAN_SITE_URL *****************"
-echo "***************CBA-CKAN $CKAN_APP_VERSION ********"
+echo "***************CKAN-AWS $CKAN_APP_VERSION ********"
 echo "************************************************"
 echo "************************************************"
 echo "************************************************"
-ckan push-errors push-message --message "CBA-CKAN $CKAN_APP_VERSION started successfully" || echo "Push errors failed"
+ckan push-errors push-message --message "CKAN-AWS $CKAN_APP_VERSION started successfully" || echo "Push errors failed"
 
 # Any other command to continue running and allow to stop CKAN
 tail -f /var/log/supervisor/*.log
