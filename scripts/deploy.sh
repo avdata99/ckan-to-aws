@@ -77,8 +77,6 @@ docker tag redis_aws:latest $ECR_REGISTRY/ckan-redis:$ENVIRONMENT
 docker push $ECR_REGISTRY/ckan-redis:$ENVIRONMENT
 
 echo "Building main CKAN application..."
-
-
 # Build main CKAN application using Makefile
 # Load container env from docker/ckan/files/env/base.env + docker/ckan/files/env/ENV_NAME.env
 set -o allexport; source ckan/files/env/base.env; source ckan/files/env/$ENV_NAME.env; set +o allexport

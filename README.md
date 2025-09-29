@@ -1,5 +1,14 @@
 # CKAN automated deploys to AWS
 
+> **ALPHA STAGE WARNING**
+> This project is currently in **alpha stage** and under active development.  
+> - Features may be incomplete or unstable
+> - Breaking changes may occur without notice  
+> - Not recommended for production use without thorough testing
+> - Documentation may be incomplete or outdated
+> 
+> Use at your own risk and please report any issues you encounter.
+
 This repository contains the necessary configuration and scripts to
 automate the deployment of CKAN instances to AWS infrastructure.
 
