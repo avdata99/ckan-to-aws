@@ -24,16 +24,31 @@ ckan db upgrade
 # Rebuild search index
 ckan search-index rebuild
 
-# Update tracking
-echo "Updating CKAN core tracking"
-LAST_MONTH=$(date -d '60 days ago' +'%Y-%m-%d')
-ckan tracking update $LAST_MONTH
-
-# Datapusher+ requires a valid API token to operate
-echo "Creating a valid API token for Datapusher+"
-DATAPUSHER_TOKEN=$(ckan user token add default datapusher_multi expires_in=365 unit=86400 | tail -n 1 | tr -d '\t')
-ckan config-tool ckan.ini "ckan.datapusher.api_token=${DATAPUSHER_TOKEN}"
-ckan config-tool ckan.ini "ckanext.datapusher_plus.api_token=${DATAPUSHER_TOKEN}"
+EXTENSIONS_LIST_FILE="${APP_DIR}/files/env/extensions.list.txt"
+# At this point, this file exists.
+# iterate all folders like EXTENSION_DIR="${APP_DIR}/extensions/$extension"
+# and if the file extension.entrypoint.sh exists, run it
+if [ -f "$EXTENSIONS_LIST_FILE" ]; then
+    while IFS= read -r extension || [ -n "$extension" ]; do
+        # Skip comments and empty lines
+        [[ "$extension" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${extension// }" ]] && continue
+        
+        extension=$(echo "$extension" | xargs)  # trim whitespace
+        
+        EXTENSION_DIR="${APP_DIR}/extensions/$extension"
+        ENTRYPOINT_SCRIPT="$EXTENSION_DIR/extension.entrypoint.sh"
+        
+        if [ -f "$ENTRYPOINT_SCRIPT" ]; then
+            echo "Running entrypoint script for $extension"
+            chmod +x "$ENTRYPOINT_SCRIPT"
+            bash "$ENTRYPOINT_SCRIPT"
+        else
+            echo "No entrypoint script found for $extension"
+        fi
+        
+    done < "$EXTENSIONS_LIST_FILE"
+fi
 
 ckan config-tool ckan.ini "ckanext.ckan_aws.version=${CKAN_APP_VERSION}"
 
@@ -72,7 +87,9 @@ echo "***************CKAN-AWS $CKAN_APP_VERSION ********"
 echo "************************************************"
 echo "************************************************"
 echo "************************************************"
-ckan push-errors push-message --message "CKAN-AWS $CKAN_APP_VERSION started successfully" || echo "Push errors failed"
 
 # Any other command to continue running and allow to stop CKAN
+# This avoid cloud providers to panic thinking CKAN is not running and they need
+# to restart it.
+# You can stop/restart CKAN without any cloud provider intervention
 tail -f /var/log/supervisor/*.log

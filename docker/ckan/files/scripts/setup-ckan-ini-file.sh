@@ -35,9 +35,39 @@ ckan config-tool ${CKAN_INI} "solr_url = ${SOLR_URL}"
 # Example: 'rediss://default:<pass>@<name>.redis.cache.windows.net:6380'
 ckan config-tool ${CKAN_INI} "ckan.redis.url = ${CKAN_REDIS_URL}"
 
-# Example: postgresql://<user>:<pass>@<name>.postgres.database.azure.com/datastore_default?sslmode=require
-ckan config-tool ${CKAN_INI} "ckan.datastore.write_url = ${DATASTORE_WRITE_URL}"
-ckan config-tool ${CKAN_INI} "ckan.datastore.read_url = ${DATASTORE_READ_URL}"
+# Build plugins list from extensions
+PLUGINS_LIST=""
+EXTENSIONS_LIST_FILE="${APP_DIR}/files/env/extensions.list.txt"
+if [ -f "$EXTENSIONS_LIST_FILE" ]; then
+    while IFS= read -r extension || [ -n "$extension" ]; do
+        # Skip comments and empty lines
+        [[ "$extension" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${extension// }" ]] && continue
+        
+        extension=$(echo "$extension" | xargs)  # trim whitespace
+        
+        EXTENSION_DIR="${APP_DIR}/extensions/$extension"
+        PLUGINS_FILE="$EXTENSION_DIR/extension.plugins.txt"
+        
+        if [ -f "$PLUGINS_FILE" ]; then
+            EXTENSION_PLUGINS=$(cat "$PLUGINS_FILE" | xargs)
+            if [ -n "$EXTENSION_PLUGINS" ]; then
+                if [ -z "$PLUGINS_LIST" ]; then
+                    PLUGINS_LIST="$EXTENSION_PLUGINS"
+                else
+                    PLUGINS_LIST="$PLUGINS_LIST $EXTENSION_PLUGINS"
+                fi
+            fi
+        fi
+        
+    done < "$EXTENSIONS_LIST_FILE"
+fi
+
+# Set the plugins configuration
+if [ -n "$PLUGINS_LIST" ]; then
+    echo "Configuring CKAN plugins: $PLUGINS_LIST"
+    ckan config-tool ${CKAN_INI} "ckan.plugins = $PLUGINS_LIST datapusher"
+fi
 
 ckan config-tool ${CKAN_INI} -s logger_ckan "level = INFO"
 ckan config-tool ${CKAN_INI} -s logger_ckanext "level = INFO"
@@ -51,6 +81,28 @@ else
   ckan config-tool ${CKAN_INI} "ckanext.push_errors.method = POST"
   ckan config-tool ${CKAN_INI} "ckanext.push_errors.headers={}"
   ckan config-tool ${CKAN_INI} "ckanext.push_errors.data={\"text\": \"{message}\", \"username\": \"CKAN AWS LOGS\", \"icon_url\": \"https://github.com/unckan/ckanext-push-errors/raw/main/icons/server-error.png\"}"
+fi
+
+# Run extension-specific ini configuration
+EXTENSIONS_LIST_FILE="${APP_DIR}/files/env/extensions.list.txt"
+if [ -f "$EXTENSIONS_LIST_FILE" ]; then
+    while IFS= read -r extension || [ -n "$extension" ]; do
+        # Skip comments and empty lines
+        [[ "$extension" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${extension// }" ]] && continue
+        
+        extension=$(echo "$extension" | xargs)  # trim whitespace
+        
+        EXTENSION_DIR="${APP_DIR}/extensions/$extension"
+        INI_SCRIPT="$EXTENSION_DIR/extension.ini.sh"
+        
+        if [ -f "$INI_SCRIPT" ]; then
+            echo "Running ini configuration script for $extension"
+            chmod +x "$INI_SCRIPT"
+            bash "$INI_SCRIPT"
+        fi
+        
+    done < "$EXTENSIONS_LIST_FILE"
 fi
 
 echo "Configuration file setup complete"

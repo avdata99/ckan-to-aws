@@ -4,3 +4,5 @@ api-tracking
 announcements
 push-errors
 core-tracking
+core-datastore
+core-datapusher
