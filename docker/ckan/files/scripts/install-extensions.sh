@@ -11,7 +11,7 @@ python -m venv ${APP_DIR}/venv
 source ${APP_DIR}/venv/bin/activate
 
 # Read extensions list and install each one
-EXTENSIONS_LIST_FILE="${APP_DIR}/files/env/extensions.list.txt"
+EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"
 if [ ! -f "$EXTENSIONS_LIST_FILE" ]; then
     echo "Extensions list file not found: $EXTENSIONS_LIST_FILE"
     exit 1

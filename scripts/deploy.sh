@@ -76,21 +76,22 @@ cd ../docker
 # docker tag redis_aws:latest $ECR_REGISTRY/ckan-redis:$ENVIRONMENT
 # docker push $ECR_REGISTRY/ckan-redis:$ENVIRONMENT
 
-echo "Building main CKAN application..."
-# Build main CKAN application using Makefile
-# Load container env from docker/ckan/files/env/base.env + docker/ckan/files/env/ENV_NAME.env
-set -o allexport; source ckan/files/env/base.env; source ckan/files/env/$ENVIRONMENT.env; set +o allexport
-make build-ckan ENV_NAME=$ENVIRONMENT
+# echo "Building main CKAN application..."
+# # Build main CKAN application using Makefile
+# # Load container env from docker/ckan/files/env/base.env + docker/ckan/files/env/ENV_NAME.env
+# set -o allexport; source ckan/files/env/base.env; source ckan/files/env/$ENVIRONMENT.env; set +o allexport
+# make build-ckan ENV_NAME=$ENVIRONMENT
 
-# Tag and push CKAN app to ECR
-echo "Tagging and pushing CKAN app to ECR..."
-docker tag ckan_aws:$ENVIRONMENT $ECR_REGISTRY/ckan-app:$ENVIRONMENT
-docker push $ECR_REGISTRY/ckan-app:$ENVIRONMENT
+# # Tag and push CKAN app to ECR
+# echo "Tagging and pushing CKAN app to ECR..."
+# docker tag ckan_aws:$ENVIRONMENT $ECR_REGISTRY/ckan-app:$ENVIRONMENT
+# docker push $ECR_REGISTRY/ckan-app:$ENVIRONMENT
 
 echo "All Docker images pushed to ECR successfully!"
 
 # Deploy all stacks
 echo "Deploying infrastructure stacks..."
+cd ../cdk
 cdk deploy --all --require-approval ${CDK_REQUIRE_APPROVAL:-never} \
   ${AWS_PROFILE:+--profile $AWS_PROFILE} \
   --context environment=$ENVIRONMENT \
