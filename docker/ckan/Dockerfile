@@ -41,6 +41,7 @@ COPY files/ckan.ini ${CKAN_INI}
 COPY files/scripts/install-ckan.sh ${APP_DIR}/files/scripts/install-ckan.sh
 COPY files/scripts/install-extensions.sh ${APP_DIR}/files/scripts/install-extensions.sh
 COPY files/scripts/setup-ckan-ini-file.sh ${APP_DIR}/files/scripts/setup-ckan-ini-file.sh
+COPY extensions ${APP_DIR}/extensions
 
 # Create the ckan user
 RUN useradd -m -s /bin/bash ckan
