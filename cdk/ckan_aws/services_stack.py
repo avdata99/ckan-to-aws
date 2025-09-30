@@ -2,6 +2,7 @@ import aws_cdk as cdk
 from aws_cdk import aws_ecs as ecs, aws_ec2 as ec2, aws_logs as logs
 from constructs import Construct
 
+
 class ServicesStack(cdk.Stack):
     def __init__(self, scope: Construct, construct_id: str, vpc: ec2.Vpc, env_name: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -50,7 +51,7 @@ class ServicesStack(cdk.Stack):
             memory_limit_mib=1024 if self.env_name == "dev" else 2048,
             cpu=512 if self.env_name == "dev" else 1024
         )
-        
+
         # Solr container with CKAN schema
         self.solr_container = self.solr_task_def.add_container(
             "SolrContainer",
@@ -68,7 +69,10 @@ class ServicesStack(cdk.Stack):
                 )
             ),
             health_check=ecs.HealthCheck(
-                command=["CMD-SHELL", "wget -qO- http://localhost:8983/solr/ckan/admin/ping | grep '\"status\":\"OK\"' || exit 1"],
+                command=[
+                    "CMD-SHELL",
+                    "wget -qO- http://localhost:8983/solr/ckan/admin/ping | grep '\"status\":\"OK\"' || exit 1"
+                ],
                 interval=cdk.Duration.seconds(30),
                 timeout=cdk.Duration.seconds(10),
                 retries=3,
@@ -98,12 +102,12 @@ class ServicesStack(cdk.Stack):
     def _create_redis_service(self):
         # Redis/Valkey task definition
         self.redis_task_def = ecs.FargateTaskDefinition(
-            self, "RedisTaskDefinition", 
+            self, "RedisTaskDefinition",
             family=f"ckan-{self.env_name}-redis",
             memory_limit_mib=512 if self.env_name == "dev" else 1024,
             cpu=256 if self.env_name == "dev" else 512
         )
-        
+
         # Redis/Valkey container - simplified configuration
         self.redis_container = self.redis_task_def.add_container(
             "RedisContainer",
@@ -113,7 +117,7 @@ class ServicesStack(cdk.Stack):
                 stream_prefix="redis",
                 log_group=logs.LogGroup(
                     self, "RedisLogGroup",
-                    log_group_name=f"/ecs/ckan-{self.env_name}-redis", 
+                    log_group_name=f"/ecs/ckan-{self.env_name}-redis",
                     retention=logs.RetentionDays.ONE_WEEK if self.env_name == "dev" else logs.RetentionDays.ONE_MONTH
                 )
             ),
@@ -125,11 +129,11 @@ class ServicesStack(cdk.Stack):
                 start_period=cdk.Duration.seconds(10)
             )
         )
-        
+
         self.redis_container.add_port_mappings(
             ecs.PortMapping(container_port=6379, protocol=ecs.Protocol.TCP)
         )
-        
+
         # Redis service
         self.redis_service = ecs.FargateService(
             self, "RedisService",
@@ -144,24 +148,10 @@ class ServicesStack(cdk.Stack):
             enable_logging=True,
             health_check_grace_period=cdk.Duration.seconds(60)
         )
-        
-        # Output Redis service discovery info
-        cdk.CfnOutput(
-            self, "RedisServiceName",
-            value=self.redis_service.service_name,
-            export_name=f"ckan-{self.env_name}-redis-service-name"
-        )
-                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
-            ),
-            security_groups=[self.ecs_security_group] if self.ecs_security_group else [],
-            enable_logging=True,
-            health_check_grace_period=cdk.Duration.seconds(60)
-        )
 
         # Output Redis service discovery info
         cdk.CfnOutput(
             self, "RedisServiceName",
             value=self.redis_service.service_name,
             export_name=f"ckan-{self.env_name}-redis-service-name"
-        )
         )
