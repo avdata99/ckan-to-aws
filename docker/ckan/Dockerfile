@@ -30,15 +30,11 @@ RUN ${APP_DIR}/files/scripts/install-python.sh
 COPY files/scripts/install-os-deps.sh ${APP_DIR}/files/scripts/install-os-deps.sh
 RUN ${APP_DIR}/files/scripts/install-os-deps.sh
 
+# Add config files and substitute env vars
 COPY files/etc/supervisord.base ${APP_DIR}/files/etc/supervisord.conf
 COPY files/etc/ckan*.conf ${APP_DIR}/files/etc/
 COPY files/scripts/prepare-supervisor.sh ${APP_DIR}/files/scripts/prepare-supervisor.sh
 RUN ${APP_DIR}/files/scripts/prepare-supervisor.sh
-
-# Copy all pending files
-COPY files/scripts/prepare-local-dev-extensions.sh ${APP_DIR}/files/scripts/prepare-local-dev-extensions.sh
-COPY files/cert/localhost.cert ${APP_DIR}/files/cert/localhost.cert
-COPY files/cert/localhost.key ${APP_DIR}/files/cert/localhost.key
 
 COPY files/patches ${APP_DIR}/files/patches
 COPY files/ckan.ini ${CKAN_INI}

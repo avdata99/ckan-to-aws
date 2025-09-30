@@ -7,7 +7,7 @@ if [ -z "$ENV_NAME" ]; then
   exit 1
 fi
 
-echo "Building DATOS GESTION ABIERTA for ${ENV_NAME} env"
+echo "Building env vars for ${ENV_NAME} env"
 
 cat ${APP_DIR}/files/env/base.env > ${APP_DIR}/.env
 echo "CKAN_INI=${APP_DIR}/ckan.ini" >> ${APP_DIR}/.env

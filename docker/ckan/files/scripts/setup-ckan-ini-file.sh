@@ -42,17 +42,6 @@ ckan config-tool ${CKAN_INI} "ckan.datastore.read_url = ${DATASTORE_READ_URL}"
 ckan config-tool ${CKAN_INI} -s logger_ckan "level = INFO"
 ckan config-tool ${CKAN_INI} -s logger_ckanext "level = INFO"
 
-# Superset settings
-ckan config-tool ${CKAN_INI} "ckanext.superset.instance.url = ${SUPERSER_URL}"
-ckan config-tool ${CKAN_INI} "ckanext.superset.instance.user = ${SUPERSER_USER}"
-ckan config-tool ${CKAN_INI} "ckanext.superset.instance.pass = ${SUPERSER_PASS}"
-ckan config-tool ${CKAN_INI} "ckanext.superset.instance.provider = ${SUPERSER_PROVIDER}"
-ckan config-tool ${CKAN_INI} "ckanext.superset.instance.refresh = ${SUPERSER_REFRESH}"
-ckan config-tool ${CKAN_INI} "ckanext.superset.proxy.url = ${SUPERSER_PROXY_URL}"
-ckan config-tool ${CKAN_INI} "ckanext.superset.proxy.port = ${SUPERSER_PROXY_PORT}"
-ckan config-tool ${CKAN_INI} "ckanext.superset.proxy.user = ${SUPERSER_PROXY_USER}"
-ckan config-tool ${CKAN_INI} "ckanext.superset.proxy.pass = ${SUPERSER_PROXY_PASS}"
-
 # push-errors-settings
 if [ -z "${SLACK_WEBHOOK_URL}" ]; then
   echo "SLACK_WEBHOOK_URL is not set. push-errors will not be configured."

@@ -1,14 +1,14 @@
 ; supervisor config file
 
 [unix_http_server]
-file=$APP_DIR/supervisor.sock   ; (the path to the socket file)
-chmod=0700                       ; sockef file mode (default 0700)
+file=$APP_DIR/supervisor.sock;
+chmod=0700;
 chown=ckan:ckan
 
 [supervisord]
-logfile=/var/log/supervisor/supervisord.log ; (main log file;default $CWD/supervisord.log)
-pidfile=$APP_DIR/supervisord.pid ; (supervisord pidfile;default supervisord.pid)
-childlogdir=/var/log/supervisor            ; ('AUTO' child log dir, default $TEMP)
+logfile=/var/log/supervisor/supervisord.log;
+pidfile=$APP_DIR/supervisord.pid;
+childlogdir=/var/log/supervisor;
 
 ; the below section must remain in the config file for RPC
 ; (supervisorctl/web interface) to work, additional interfaces may be
