@@ -28,7 +28,8 @@ done
 
 # Build and push Docker images to ECR
 echo "Building and pushing Docker images to ECR..."
-cd ../docker
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR/../docker"
 
 # Build and push Solr image
 echo "Building Solr image..."
