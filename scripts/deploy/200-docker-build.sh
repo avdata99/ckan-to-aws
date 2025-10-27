@@ -4,32 +4,31 @@ set -e
 echo "Starting Docker build and push process..."
 
 # Validate required variables
-if [ -z "$ENVIRONMENT" ] || [ -z "$CDK_CONTEXT_region" ] || [ -z "$CDK_CONTEXT_account" ]; then
+if [ -z "$ENVIRONMENT" ] || [ -z "$AWS_REGION" ] || [ -z "$AWS_ACCOUNT_ID" ]; then
     echo "Error: Required environment variables not set. Run env-setup.sh first."
     exit 1
 fi
 
 # ECR Configuration
 echo "Configuring ECR..."
-ECR_REGISTRY=${ECR_REGISTRY:-$CDK_CONTEXT_account.dkr.ecr.$CDK_CONTEXT_region.amazonaws.com}
 echo "ECR Registry: $ECR_REGISTRY"
 
 # Login to ECR
 echo "Logging into ECR..."
-aws ecr get-login-password $AWS_PROFILE_OPTION --region $CDK_CONTEXT_region | docker login --username AWS --password-stdin $ECR_REGISTRY
+aws ecr get-login-password $AWS_PROFILE_OPTION --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
 
 # Create ECR repositories if they don't exist
 echo "Ensuring ECR repositories exist..."
 for repo in ckan-app ckan-solr ckan-redis; do
     echo "Checking repository: $repo"
-    aws ecr describe-repositories $AWS_PROFILE_OPTION --repository-names $repo --region $CDK_CONTEXT_region 2>/dev/null || \
-    aws ecr create-repository $AWS_PROFILE_OPTION --repository-name $repo --region $CDK_CONTEXT_region
+    aws ecr describe-repositories $AWS_PROFILE_OPTION --repository-names $repo --region $AWS_REGION 2>/dev/null || \
+    aws ecr create-repository $AWS_PROFILE_OPTION --repository-name $repo --region $AWS_REGION
 done
 
 # Build and push Docker images to ECR
 echo "Building and pushing Docker images to ECR..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR/../docker"
+cd "$SCRIPT_DIR/../../docker"
 
 # Build and push Solr image
 echo "Building Solr image..."

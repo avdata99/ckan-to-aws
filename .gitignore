@@ -1,4 +1,8 @@
-.vscode/
+# Our ignores
+# terraform configuration variables file
+terraform/terraform.tfvars
+# Local environment variables
+.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
