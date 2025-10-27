@@ -30,25 +30,23 @@ done
 echo "Building and pushing Docker images to ECR..."
 cd ../docker
 
-# Uncomment the sections below as needed:
+# Build and push Solr image
+echo "Building Solr image..."
+make build-solr
+docker tag solr_aws:latest $ECR_REGISTRY/ckan-solr:$ENVIRONMENT
+docker push $ECR_REGISTRY/ckan-solr:$ENVIRONMENT
 
-# # Build and push Solr image
-# echo "Building Solr image..."
-# make build-solr
-# docker tag solr_aws:latest $ECR_REGISTRY/ckan-solr:$ENVIRONMENT
-# docker push $ECR_REGISTRY/ckan-solr:$ENVIRONMENT
+# Build and push Redis image
+echo "Building Redis image..."
+make build-redis
+docker tag redis_aws:latest $ECR_REGISTRY/ckan-redis:$ENVIRONMENT
+docker push $ECR_REGISTRY/ckan-redis:$ENVIRONMENT
 
-# # Build and push Redis image
-# echo "Building Redis image..."
-# make build-redis
-# docker tag redis_aws:latest $ECR_REGISTRY/ckan-redis:$ENVIRONMENT
-# docker push $ECR_REGISTRY/ckan-redis:$ENVIRONMENT
-
-# # Build main CKAN application
-# echo "Building main CKAN application..."
-# set -o allexport; source ckan/files/env/base.env; source ckan/files/env/$ENVIRONMENT.env; set +o allexport
-# make build-ckan ENV_NAME=$ENVIRONMENT
-# docker tag ckan_aws:$ENVIRONMENT $ECR_REGISTRY/ckan-app:$ENVIRONMENT
-# docker push $ECR_REGISTRY/ckan-app:$ENVIRONMENT
+# Build main CKAN application
+echo "Building main CKAN application..."
+set -o allexport; source ckan/files/env/base.env; source ckan/files/env/$ENVIRONMENT.env; set +o allexport
+make build-ckan ENV_NAME=$ENVIRONMENT
+docker tag ckan_aws:$ENVIRONMENT $ECR_REGISTRY/ckan-app:$ENVIRONMENT
+docker push $ECR_REGISTRY/ckan-app:$ENVIRONMENT
 
 echo "Docker build and push complete!"

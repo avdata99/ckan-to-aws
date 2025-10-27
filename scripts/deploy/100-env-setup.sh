@@ -20,6 +20,9 @@ for var in "${required_vars[@]}"; do
         exit 1
     fi
 done
+# Allow reusing this env vars in following scripts
+export ENVIRONMENT
+export AWS_REGION
 
 echo "Checking requirements..."
 # awscli

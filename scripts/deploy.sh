@@ -8,13 +8,13 @@ echo "CKAN to AWS Deployment"
 echo "========================================"
 
 # Step 1: Setup environment
-source "$SCRIPT_DIR/deploy/env-setup.sh"
+source "$SCRIPT_DIR/deploy/100-env-setup.sh"
 
 # Step 2: Build and push Docker images
-source "$SCRIPT_DIR/deploy/docker-build.sh"
+source "$SCRIPT_DIR/deploy/200-docker-build.sh"
 
 # Step 3: Deploy CDK stacks
-source "$SCRIPT_DIR/deploy/cdk-deploy.sh"
+source "$SCRIPT_DIR/deploy/300-cdk-deploy.sh"
 
 echo "========================================"
 echo "Deployment Complete!"
