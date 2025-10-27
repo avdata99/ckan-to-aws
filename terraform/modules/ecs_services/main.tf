@@ -60,7 +60,7 @@ resource "aws_ecs_task_definition" "support_services" {
   container_definitions = jsonencode([
     {
       name      = "solr"
-      image     = "${var.ecr_registry}/ckan-solr:latest"
+      image     = "${var.ecr_registry}/ckan-solr:${var.environment}"
       cpu       = 512
       memory    = 1024
       essential = true
@@ -96,7 +96,7 @@ resource "aws_ecs_task_definition" "support_services" {
     },
     {
       name      = "redis"
-      image     = "${var.ecr_registry}/ckan-redis:latest"
+      image     = "${var.ecr_registry}/ckan-redis::${var.environment}"
       cpu       = 512
       memory    = 1024
       essential = true
@@ -168,7 +168,7 @@ resource "aws_ecs_task_definition" "ckan" {
   container_definitions = jsonencode([
     {
       name      = "ckan"
-      image     = "${var.ecr_registry}/ckan:latest"
+      image     = "${var.ecr_registry}/ckan-app:${var.environment}"
       cpu       = 1024
       memory    = 2048
       essential = true
