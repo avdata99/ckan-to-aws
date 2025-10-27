@@ -6,7 +6,9 @@ echo "Setting up environment..."
 # Load environment variables from .env file
 if [ -f .env ]; then
     echo "Loading environment variables from .env file..."
-    export $(grep -v '^#' .env | xargs)
+    set -a
+    source .env
+    set +a
 else
     echo "No .env file found. Reading environment variables from the shell environment..."
 fi
