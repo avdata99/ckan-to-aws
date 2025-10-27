@@ -37,7 +37,7 @@ Create a Python 3.12 environment and install dependencies:
 pip install -r cdk/requirements.txt
 ```
 
-## Desplegar a AWS
+## Deploy to AWS
 
 Fill the `scripts/.env` file with the corresponding data.  
 Ensure your AWS credentials are configured locally, either via environment variables or the AWS CLI configuration.  
