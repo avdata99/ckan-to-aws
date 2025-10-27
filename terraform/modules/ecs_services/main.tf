@@ -96,7 +96,7 @@ resource "aws_ecs_task_definition" "support_services" {
     },
     {
       name      = "redis"
-      image     = "${var.ecr_registry}/ckan-redis::${var.environment}"
+      image     = "${var.ecr_registry}/ckan-redis:${var.environment}"
       cpu       = 512
       memory    = 1024
       essential = true
