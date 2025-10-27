@@ -226,16 +226,16 @@ resource "aws_ecs_task_definition" "ckan" {
         startPeriod = 120
       }
 
-      dependsOn = [
-        {
-          containerName = "solr"
-          condition     = "HEALTHY"
-        },
-        {
-          containerName = "redis"
-          condition     = "HEALTHY"
-        }
-      ]
+      # dependsOn = [
+      #   {
+      #     containerName = "solr"
+      #     condition     = "HEALTHY"
+      #   },
+      #   {
+      #     containerName = "redis"
+      #     condition     = "HEALTHY"
+      #   }
+      # ]
     }
   ])
 
