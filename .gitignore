@@ -53,3 +53,13 @@ cover/
 .venv
 env/
 venv/
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
