@@ -9,9 +9,12 @@ if [ -z "$ENVIRONMENT" ] || [ -z "$CDK_CONTEXT_region" ] || [ -z "$CDK_CONTEXT_a
     exit 1
 fi
 
+# Determine the directory of this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Deploy all stacks
 echo "Deploying infrastructure stacks..."
-cd ../cdk
+cd "$SCRIPT_DIR/../cdk"
 
 cdk deploy --all --require-approval ${CDK_REQUIRE_APPROVAL:-never} \
   ${AWS_PROFILE:+--profile $AWS_PROFILE} \
