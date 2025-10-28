@@ -33,4 +33,9 @@ resource "aws_db_instance" "main" {
     Name        = "ckan-${var.environment}-db"
     Environment = var.environment
   }
+
+  lifecycle {
+    ignore_changes = [tags, tags_all]
+  }
+
 }
