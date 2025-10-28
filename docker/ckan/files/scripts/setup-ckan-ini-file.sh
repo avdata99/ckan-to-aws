@@ -66,7 +66,7 @@ fi
 # Set the plugins configuration
 if [ -n "$PLUGINS_LIST" ]; then
     echo "Configuring CKAN plugins: $PLUGINS_LIST"
-    ckan config-tool ${CKAN_INI} "ckan.plugins = $PLUGINS_LIST datapusher"
+    ckan config-tool ${CKAN_INI} "ckan.plugins = $PLUGINS_LIST"
 fi
 
 ckan config-tool ${CKAN_INI} -s logger_ckan "level = INFO"
