@@ -84,7 +84,7 @@ else
 fi
 
 # Run extension-specific ini configuration
-EXTENSIONS_LIST_FILE="${APP_DIR}/files/env/extensions.list.txt"
+EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"
 if [ -f "$EXTENSIONS_LIST_FILE" ]; then
     while IFS= read -r extension || [ -n "$extension" ]; do
         # Skip comments and empty lines
