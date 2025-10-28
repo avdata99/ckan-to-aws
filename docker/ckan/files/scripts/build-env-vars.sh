@@ -21,6 +21,11 @@ else
     echo "" >> ${APP_DIR}/.env
     cat ${APP_DIR}/files/env/${ENV_NAME}.env >> ${APP_DIR}/.env
 fi
+# Include AWS.env as well
+if [ -f ${APP_DIR}/files/env/AWS.env ]; then
+    echo "" >> ${APP_DIR}/.env
+    cat ${APP_DIR}/files/env/AWS.env >> ${APP_DIR}/.env
+fi
 
 # Load env vars from ${APP_DIR}/.env to test them
 set -o allexport
