@@ -11,7 +11,7 @@ echo "========================================"
 source "$SCRIPT_DIR/deploy/100-env-setup.sh"
 
 # Step 2: Build and push Docker images
-# source "$SCRIPT_DIR/deploy/200-docker-build.sh"
+source "$SCRIPT_DIR/deploy/200-docker-build.sh"
 
 # Step 3: Deploy infrastructure with Terraform
 source "$SCRIPT_DIR/deploy/300-terraform-deploy.sh"
