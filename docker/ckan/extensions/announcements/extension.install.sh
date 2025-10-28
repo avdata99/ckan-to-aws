@@ -1,4 +1,7 @@
 #!/bin/bash -e
 echo "Installing Announcements extension"
-pip install -q git+https://github.com/okfn/ckanext-announcements.git@0.1.4#egg=ckanext-announcements
-pip install -q -r https://raw.githubusercontent.com/okfn/ckanext-announcements/0.1.4/requirements.txt
+TEMP_DIR=$(mktemp -d)
+git clone --depth 1 --branch 0.1.4 https://github.com/okfn/ckanext-announcements.git "$TEMP_DIR"
+pip install -q "$TEMP_DIR"
+pip install -q -r "$TEMP_DIR/requirements.txt"
+rm -rf "$TEMP_DIR"
