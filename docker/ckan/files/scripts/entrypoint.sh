@@ -7,10 +7,6 @@ set +o allexport
 
 echo "Executing entrypoint.sh"
 
-# Install extensions
-echo "Installing CKAN extensions"
-# Now run ${APP_DIR}/files/scripts/install-extensions.sh
-bash ${APP_DIR}/files/scripts/install-extensions.sh
 # The CKAN PostgreSQL image creates the database and user
 # https://github.com/ckan/ckan-postgres-dev/blob/main/Dockerfile
 # Wait for the database to be ready
