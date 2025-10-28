@@ -11,9 +11,17 @@ echo "Executing entrypoint.sh"
 # https://github.com/ckan/ckan-postgres-dev/blob/main/Dockerfile
 # Wait for the database to be ready
 
+COUNTER=0
 until psql -d $SQLALCHEMY_URL -c '\q'; do
-  echo "Postgres is unavailable - sleeping. Response: $?"
-  sleep 3
+    echo "Postgres is unavailable - sleeping. Response: $?"
+    sleep 3
+    # Temporary avoid infinite loop in case the DB is not reachable
+    COUNTER=$((COUNTER+1))
+    if [ $COUNTER -ge 30 ]; then
+        echo "Probably DB is not ready, just ensure this do not fail so we avoid an infinite ECS loop"
+        # Run a forever command to avoid ECS thinking the container failed
+        tail -f /dev/null
+    fi
 done
 
 source ${APP_DIR}/venv/bin/activate

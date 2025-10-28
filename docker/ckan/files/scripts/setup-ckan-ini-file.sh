@@ -37,7 +37,7 @@ ckan config-tool ${CKAN_INI} "ckan.redis.url = ${CKAN_REDIS_URL}"
 
 # Build plugins list from extensions
 PLUGINS_LIST=""
-EXTENSIONS_LIST_FILE="${APP_DIR}/files/env/extensions.list.txt"
+EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"
 if [ -f "$EXTENSIONS_LIST_FILE" ]; then
     while IFS= read -r extension || [ -n "$extension" ]; do
         # Skip comments and empty lines
@@ -66,7 +66,7 @@ fi
 # Set the plugins configuration
 if [ -n "$PLUGINS_LIST" ]; then
     echo "Configuring CKAN plugins: $PLUGINS_LIST"
-    ckan config-tool ${CKAN_INI} "ckan.plugins = $PLUGINS_LIST datapusher"
+    ckan config-tool ${CKAN_INI} "ckan.plugins = $PLUGINS_LIST"
 fi
 
 ckan config-tool ${CKAN_INI} -s logger_ckan "level = INFO"
@@ -84,7 +84,7 @@ else
 fi
 
 # Run extension-specific ini configuration
-EXTENSIONS_LIST_FILE="${APP_DIR}/files/env/extensions.list.txt"
+EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"
 if [ -f "$EXTENSIONS_LIST_FILE" ]; then
     while IFS= read -r extension || [ -n "$extension" ]; do
         # Skip comments and empty lines

@@ -1,4 +1,7 @@
 #!/bin/bash -e
 echo "Installing API-tracking extension"
-pip install -q git+https://github.com/NorwegianRefugeeCouncil/ckanext-api-tracking.git@0.5.2#egg=ckanext-api-tracking
-pip install -q -r https://raw.githubusercontent.com/NorwegianRefugeeCouncil/ckanext-api-tracking/refs/tags/0.5.2/requirements.txt
+TEMP_DIR=$(mktemp -d)
+git clone --depth 1 --branch 0.5.2 https://github.com/NorwegianRefugeeCouncil/ckanext-api-tracking.git "$TEMP_DIR"
+pip install -q "$TEMP_DIR"
+pip install -q -r "$TEMP_DIR/requirements.txt"
+rm -rf "$TEMP_DIR"

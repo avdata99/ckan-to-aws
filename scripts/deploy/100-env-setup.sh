@@ -3,14 +3,19 @@ set -e
 
 echo "Setting up environment..."
 
-# Load environment variables from .env file
-if [ -f .env ]; then
-    echo "Loading environment variables from .env file..."
+# Determine project root directory
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+# Load environment variables from .env file in project root
+if [ -f "$PROJECT_ROOT/.env" ]; then
+    echo "Loading environment variables from $PROJECT_ROOT/.env"
     set -a
-    source .env
+    source "$PROJECT_ROOT/.env"
     set +a
 else
-    echo "No .env file found. Reading environment variables from the shell environment..."
+    echo "No .env file found at $PROJECT_ROOT/.env"
+    echo "Please copy .env.sample to .env and configure it"
+    exit 1
 fi
 
 # Validate required environment variables
@@ -22,9 +27,6 @@ for var in "${required_vars[@]}"; do
         exit 1
     fi
 done
-# Allow reusing this env vars in following scripts
-export ENVIRONMENT
-export AWS_REGION
 
 echo "Checking requirements..."
 # awscli
@@ -47,12 +49,12 @@ fi
 export AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID:-$(aws sts get-caller-identity $AWS_PROFILE_OPTION --query Account --output text)}
 echo "AWS Account ID: $AWS_ACCOUNT_ID"
 
-# Set CDK context variables
-export CDK_CONTEXT_environment=$ENVIRONMENT
-export CDK_CONTEXT_account=${AWS_ACCOUNT_ID}
-export CDK_CONTEXT_region=$AWS_REGION
+# Set ECR registry
+export ECR_REGISTRY=${ECR_REGISTRY:-$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com}
+echo "ECR Registry: $ECR_REGISTRY"
 
 echo "Environment setup complete!"
 echo "  Environment: $ENVIRONMENT"
 echo "  Region: $AWS_REGION"
 echo "  Account: $AWS_ACCOUNT_ID"
+echo "  ECR Registry: $ECR_REGISTRY"

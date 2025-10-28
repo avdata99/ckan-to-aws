@@ -1,4 +1,7 @@
 #!/bin/bash -e
 echo "Installing Datapusher+ extension"
-pip install -q git+https://github.com/okfn/datapusher-plus.git@okfn_tmp#egg=datapusher_plus
-pip install -q -r https://raw.githubusercontent.com/okfn/datapusher-plus/okfn_tmp/requirements.txt
+TEMP_DIR=$(mktemp -d)
+git clone --depth 1 --branch okfn_tmp https://github.com/okfn/datapusher-plus.git "$TEMP_DIR"
+pip install -q "$TEMP_DIR"
+pip install -q -r "$TEMP_DIR/requirements.txt"
+rm -rf "$TEMP_DIR"

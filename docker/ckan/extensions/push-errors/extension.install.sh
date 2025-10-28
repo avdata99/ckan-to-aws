@@ -1,4 +1,7 @@
 #!/bin/bash -e
 echo "Installing Push Errors extension"
-pip install -q git+https://github.com/unckan/ckanext-push-errors.git@0.1.5#egg=ckanext-push-errors
-pip install -r https://raw.githubusercontent.com/unckan/ckanext-push-errors/refs/tags/0.1.5/requirements.txt
+TEMP_DIR=$(mktemp -d)
+git clone --depth 1 --branch 0.1.5 https://github.com/unckan/ckanext-push-errors.git "$TEMP_DIR"
+pip install -q "$TEMP_DIR"
+pip install -r "$TEMP_DIR/requirements.txt"
+rm -rf "$TEMP_DIR"

@@ -14,7 +14,7 @@ apt install -y gettext-base git libmagic1 libpq-dev postgresql-client supervisor
 # gettext-base: for envsubst command
 # vim: because why not
 
-EXTENSIONS_LIST_FILE="${APP_DIR}/files/env/extensions.list.txt"
+EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"
 # At this point, this file exists.
 # iterate all folders like EXTENSION_DIR="${APP_DIR}/extensions/$extension"
 # and if the file extension.entrypoint.sh exists, run it
