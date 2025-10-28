@@ -37,7 +37,7 @@ ckan config-tool ${CKAN_INI} "ckan.redis.url = ${CKAN_REDIS_URL}"
 
 # Build plugins list from extensions
 PLUGINS_LIST=""
-EXTENSIONS_LIST_FILE="${APP_DIR}/files/env/extensions.list.txt"
+EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"
 if [ -f "$EXTENSIONS_LIST_FILE" ]; then
     while IFS= read -r extension || [ -n "$extension" ]; do
         # Skip comments and empty lines
