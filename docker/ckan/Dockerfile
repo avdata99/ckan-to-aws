@@ -12,6 +12,17 @@ ENV ENV_NAME=${ENV_NAME}
 WORKDIR ${APP_DIR}
 RUN apt update
 
+# Install locales early to prevent locale errors
+RUN apt-get install -y locales && \
+    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen en_US.UTF-8 && \
+    update-locale LANG=en_US.UTF-8
+
+# Set locale environment variables
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+
 # Copy files one by one to ensure Dockerfile is caching layers
 # and the change in one file does not invalidate the cache of the others
 
@@ -53,7 +64,6 @@ USER ckan
 
 # Install CKAN
 RUN ${APP_DIR}/files/scripts/install-ckan.sh
-RUN ${APP_DIR}/files/scripts/install-extensions.sh
 RUN cp $APP_DIR/ckan/wsgi.py .
 RUN chmod u+x wsgi.py
 RUN ${APP_DIR}/files/scripts/setup-ckan-ini-file.sh
