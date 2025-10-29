@@ -104,6 +104,10 @@ terraform plan \
   -var="db_allocated_storage=${DB_ALLOCATED_STORAGE:-20}" \
   -var="ckan_site_url=$CKAN_SITE_URL" \
   -var="vpc_cidr=${VPC_CIDR:-10.0.0.0/16}" \
+  -var="datastore_write_username=${DATASTORE_WRITE_USERNAME:-datastore_write}" \
+  -var="datastore_write_password=${DATASTORE_WRITE_PASSWORD:-pass}" \
+  -var="datastore_read_username=${DATASTORE_READ_USERNAME:-datastore_read}" \
+  -var="datastore_read_password=${DATASTORE_READ_PASSWORD:-pass}" \
   -out=tfplan
 
 echo ""

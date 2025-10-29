@@ -67,3 +67,28 @@ variable "ckan_site_id" {
   type        = string
   default     = "default"
 }
+
+# Datastore variables
+variable "datastore_write_username" {
+  description = "Datastore write user username"
+  type        = string
+  default     = "datastore_write"
+}
+
+variable "datastore_write_password" {
+  description = "Datastore write user password"
+  type        = string
+  sensitive   = true
+}
+
+variable "datastore_read_username" {
+  description = "Datastore read user username"
+  type        = string
+  default     = "datastore_read"
+}
+
+variable "datastore_read_password" {
+  description = "Datastore read user password"
+  type        = string
+  sensitive   = true
+}

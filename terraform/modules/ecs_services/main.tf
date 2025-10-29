@@ -201,11 +201,11 @@ resource "aws_ecs_task_definition" "ckan" {
         },
         {
           name  = "CKAN_DATASTORE_WRITE_URL"
-          value = "postgresql://${var.db_username}:${var.db_password}@${var.db_host}/datastore"
+          value = "postgresql://${var.datastore_write_username}:${var.datastore_write_password}@${var.db_host}/datastore"
         },
         {
           name  = "CKAN_DATASTORE_READ_URL"
-          value = "postgresql://${var.db_username}:${var.db_password}@${var.db_host}/datastore"
+          value = "postgresql://${var.datastore_read_username}:${var.datastore_read_password}@${var.db_host}/datastore"
         }
       ]
 
