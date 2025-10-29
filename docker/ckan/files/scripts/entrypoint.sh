@@ -24,6 +24,11 @@ until psql -d $SQLALCHEMY_URL -c '\q'; do
     fi
 done
 
+# Setup the datastore
+echo "Setting up Datastore"
+bash ${APP_DIR}/files/scripts/setup-datastore.sh
+echo "Datastore setup complete"
+
 source ${APP_DIR}/venv/bin/activate
 
 echo "CKAN db upgrade"

@@ -87,4 +87,10 @@ module "ecs_services" {
   # CKAN configuration
   ckan_site_url = var.ckan_site_url
   ckan_site_id  = var.ckan_site_id
+  
+  # Datastore configuration
+  datastore_write_username = var.datastore_write_username
+  datastore_write_password = var.datastore_write_password
+  datastore_read_username  = var.datastore_read_username
+  datastore_read_password  = var.datastore_read_password
 }
