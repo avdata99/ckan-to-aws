@@ -93,4 +93,6 @@ module "ecs_services" {
   datastore_write_password = var.datastore_write_password
   datastore_read_username  = var.datastore_read_username
   datastore_read_password  = var.datastore_read_password
+  solr_url                 = var.solr_url
+  redis_url                = var.redis_url
 }
