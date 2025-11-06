@@ -127,10 +127,26 @@ echo ""
 echo "Step 6: Applying changes..."
 echo "--------------------------------"
 echo "Creating your infrastructure in AWS..."
-echo "This will take 10-15 minutes (RDS database is slow to create)"
 echo ""
 
 terraform apply tfplan
+
+# Force ECS service to pull new image
+echo ""
+echo "Step 7: Forcing ECS service to update..."
+echo "--------------------------------"
+ECS_CLUSTER_NAME="ckan-cluster-${ENVIRONMENT}"
+ECS_SERVICE_NAME="ckan-service-${ENVIRONMENT}"
+
+echo "Updating ECS service to force new deployment..."
+aws ecs update-service \
+  --cluster $ECS_CLUSTER_NAME \
+  --service $ECS_SERVICE_NAME \
+  --force-new-deployment \
+  $AWS_PROFILE_OPTION \
+  --region $AWS_REGION
+
+echo "ECS service update initiated"
 
 # Get outputs
 echo ""
