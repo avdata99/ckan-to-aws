@@ -19,7 +19,7 @@ else
 fi
 
 # Validate required environment variables
-required_vars=("ENVIRONMENT" "AWS_REGION")
+required_vars=("ENVIRONMENT" "AWS_REGION" "UNIQUE_PROJECT_ID")
 for var in "${required_vars[@]}"; do
     if [ -z "${!var}" ]; then
         echo "Error: Required environment variable $var is not set"
@@ -27,6 +27,13 @@ for var in "${required_vars[@]}"; do
         exit 1
     fi
 done
+
+# if UNIQUE_PROJECT_ID = "CHANGE_ME", exit with error
+if [ "$UNIQUE_PROJECT_ID" == "CHANGE_ME" ]; then
+    echo "Error: UNIQUE_PROJECT_ID is set to the default value 'CHANGE_ME'"
+    echo "Please set UNIQUE_PROJECT_ID to a unique identifier for your project in the .env file"
+    exit 1
+fi
 
 echo "Checking requirements..."
 # awscli
@@ -42,7 +49,7 @@ if [ -n "$AWS_PROFILE" ]; then
     export AWS_PROFILE_OPTION="--profile $AWS_PROFILE"
 else
     echo "No AWS profile specified, using default profile. Are you sure?"
-    read -p "Press enter to continue or Ctrl+C to cancel"
+    read -p "Press enter to continue or Ctrl+C to cancel. If you are not sure, CANCEL now."
 fi
 
 # Get AWS Account ID
