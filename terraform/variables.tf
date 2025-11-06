@@ -88,7 +88,17 @@ variable "datastore_read_username" {
 }
 
 variable "datastore_read_password" {
-  description = "Datastore read user password"
+  description = "Datastore read-only user password"
   type        = string
   sensitive   = true
+}
+
+variable "solr_url" {
+  description = "Solr URL for CKAN"
+  type        = string
+}
+
+variable "redis_url" {
+  description = "Redis URL for CKAN"
+  type        = string
 }
