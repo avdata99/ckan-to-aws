@@ -108,6 +108,8 @@ terraform plan \
   -var="datastore_write_password=${DATASTORE_WRITE_PASSWORD:-pass}" \
   -var="datastore_read_username=${DATASTORE_READ_USERNAME:-datastore_read}" \
   -var="datastore_read_password=${DATASTORE_READ_PASSWORD:-pass}" \
+  -var="solr_url=${SOLR_URL:-}" \
+  -var="redis_url=${CKAN_REDIS_URL:-}" \
   -out=tfplan
 
 echo ""
@@ -131,22 +133,41 @@ echo ""
 
 terraform apply tfplan
 
-# Force ECS service to pull new image
+# Force ECS services to pull new images
 echo ""
-echo "Step 7: Forcing ECS service to update..."
+echo "Step 7: Forcing ECS services to update..."
 echo "--------------------------------"
 ECS_CLUSTER_NAME="ckan-cluster-${ENVIRONMENT}"
-ECS_SERVICE_NAME="ckan-service-${ENVIRONMENT}"
 
-echo "Updating ECS service to force new deployment..."
-aws ecs update-service \
-  --cluster $ECS_CLUSTER_NAME \
-  --service $ECS_SERVICE_NAME \
-  --force-new-deployment \
-  $AWS_PROFILE_OPTION \
-  --region $AWS_REGION
+# Update both services
+for SERVICE_NAME in "ckan-${ENVIRONMENT}" "ckan-support-services-${ENVIRONMENT}"; do
+    echo ""
+    echo "Checking service: $SERVICE_NAME"
+    
+    if aws ecs describe-services \
+        --cluster $ECS_CLUSTER_NAME \
+        --services $SERVICE_NAME \
+        $AWS_PROFILE_OPTION \
+        --region $AWS_REGION \
+        --query 'services[0].serviceName' \
+        --output text 2>/dev/null | grep -q "$SERVICE_NAME"; then
+        
+        echo "Service found. Forcing new deployment..."
+        aws ecs update-service \
+          --cluster $ECS_CLUSTER_NAME \
+          --service $SERVICE_NAME \
+          --force-new-deployment \
+          $AWS_PROFILE_OPTION \
+          --region $AWS_REGION
+        
+        echo "✓ $SERVICE_NAME update initiated"
+    else
+        echo "⚠ Service $SERVICE_NAME not found (this is normal for first deployment)"
+    fi
+done
 
-echo "ECS service update initiated"
+echo ""
+echo "All ECS service updates initiated"
 
 # Get outputs
 echo ""

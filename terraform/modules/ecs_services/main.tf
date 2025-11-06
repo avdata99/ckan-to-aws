@@ -193,11 +193,11 @@ resource "aws_ecs_task_definition" "ckan" {
         },
         {
           name  = "CKAN_SOLR_URL"
-          value = "http://localhost:8983/solr/ckan"
+          value = var.solr_url
         },
         {
           name  = "CKAN_REDIS_URL"
-          value = "redis://localhost:6379/0"
+          value = var.redis_url
         },
         {
           name  = "CKAN_DATASTORE_WRITE_URL"
@@ -267,6 +267,7 @@ resource "aws_ecs_service" "ckan" {
   }
 
   enable_execute_command = true
+  force_new_deployment   = true
 
   depends_on = [aws_ecs_service.support_services]
 

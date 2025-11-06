@@ -96,3 +96,13 @@ variable "datastore_read_password" {
   type        = string
   sensitive   = true
 }
+
+variable "solr_url" {
+  description = "URL of the Solr instance"
+  type        = string
+}
+
+variable "redis_url" {
+  description = "URL of the Redis instance"
+  type        = string
+}
