@@ -28,9 +28,8 @@ for var in "${required_vars[@]}"; do
     fi
 done
 
-# if UNIQUE_PROJECT_ID = "CHANGE_ME", exit with error
-if [ "$UNIQUE_PROJECT_ID" == "CHANGE_ME" ]; then
-    echo "Error: UNIQUE_PROJECT_ID is set to the default value 'CHANGE_ME'"
+if [ "$UNIQUE_PROJECT_ID" == "CHANGE-ME" ]; then
+    echo "Error: UNIQUE_PROJECT_ID is set to the default value 'CHANGE-ME'"
     echo "Please set UNIQUE_PROJECT_ID to a unique identifier for your project in the .env file"
     exit 1
 fi
@@ -60,7 +59,7 @@ echo "AWS Account ID: $AWS_ACCOUNT_ID"
 export ECR_REGISTRY=${ECR_REGISTRY:-$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com}
 echo "ECR Registry: $ECR_REGISTRY"
 
-echo "Environment setup complete!"
+echo "Environment setup complete for your project $UNIQUE_PROJECT_ID"
 echo "  Environment: $ENVIRONMENT"
 echo "  Region: $AWS_REGION"
 echo "  Account: $AWS_ACCOUNT_ID"

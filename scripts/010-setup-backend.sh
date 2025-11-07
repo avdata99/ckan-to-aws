@@ -49,26 +49,29 @@ else
 fi
 
 # --- 3. DynamoDB Table for State Locking ---
-echo "Checking for DynamoDB table: $TF_STATE_DYNAMODB_TABLE..."
-if aws dynamodb describe-table --table-name "$TF_STATE_DYNAMODB_TABLE" $AWS_PROFILE_OPTION --region "$AWS_REGION" >/dev/null 2>&1; then
-    echo "DynamoDB table already exists."
+if [ "$TF_STATE_USE_DYNAMODB" = "true" ]; then
+    echo "Checking for DynamoDB table: $TF_STATE_DYNAMODB_TABLE..."
+    if aws dynamodb describe-table --table-name "$TF_STATE_DYNAMODB_TABLE" $AWS_PROFILE_OPTION --region "$AWS_REGION" >/dev/null 2>&1; then
+        echo "DynamoDB table already exists."
+    else
+        echo "DynamoDB table not found. Creating it..."
+        aws dynamodb create-table \
+            --table-name "$TF_STATE_DYNAMODB_TABLE" \
+            --attribute-definitions AttributeName=LockID,AttributeType=S \
+            --key-schema AttributeName=LockID,KeyType=HASH \
+            --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
+            --region "$AWS_REGION" \
+            $AWS_PROFILE_OPTION
+        echo "Waiting for DynamoDB table to become active..."
+        aws dynamodb wait table-exists --table-name "$TF_STATE_DYNAMODB_TABLE" --region "$AWS_REGION" $AWS_PROFILE_OPTION
+        echo "DynamoDB table created."
+    fi
 else
-    echo "DynamoDB table not found. Creating it..."
-    aws dynamodb create-table \
-        --table-name "$TF_STATE_DYNAMODB_TABLE" \
-        --attribute-definitions AttributeName=LockID,AttributeType=S \
-        --key-schema AttributeName=LockID,KeyType=HASH \
-        --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
-        --region "$AWS_REGION" \
-        $AWS_PROFILE_OPTION
-    echo "Waiting for DynamoDB table to become active..."
-    aws dynamodb wait table-exists --table-name "$TF_STATE_DYNAMODB_TABLE" --region "$AWS_REGION" $AWS_PROFILE_OPTION
-    echo "DynamoDB table created."
+    echo "Skipping DynamoDB table setup for state locking as per TF_STATE_USE_DYNAMODB setting."
 fi
 
 echo "========================================"
 echo "Backend setup complete!"
 echo "Next steps:"
-echo "1. Update 'tf/backend.tf' with your bucket and table names."
-echo "2. Run 'terraform init' inside the 'tf/' directory."
+echo "1. Run './scripts/030-terraform-init.sh' to initialize Terraform with the new backend."
 echo "========================================"
