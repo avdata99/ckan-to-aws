@@ -114,3 +114,70 @@ variable "db_encryption_enabled" {
   type        = bool
   default     = true
 }
+
+// --- ECS Variables ---
+variable "ecs_launch_type" {
+  description = "ECS launch type (FARGATE or EC2)"
+  type        = string
+  default     = "FARGATE"
+}
+
+variable "ckan_task_cpu" {
+  description = "CPU units for CKAN task"
+  type        = number
+  default     = 512
+}
+
+variable "ckan_task_memory" {
+  description = "Memory (MB) for CKAN task"
+  type        = number
+  default     = 1024
+}
+
+variable "solr_task_cpu" {
+  description = "CPU units for Solr task"
+  type        = number
+  default     = 256
+}
+
+variable "solr_task_memory" {
+  description = "Memory (MB) for Solr task"
+  type        = number
+  default     = 512
+}
+
+variable "redis_task_cpu" {
+  description = "CPU units for Redis task"
+  type        = number
+  default     = 256
+}
+
+variable "redis_task_memory" {
+  description = "Memory (MB) for Redis task"
+  type        = number
+  default     = 512
+}
+
+variable "ecr_ckan_repo_name" {
+  description = "ECR repository name for CKAN"
+  type        = string
+  default     = "ckan"
+}
+
+variable "ecr_solr_repo_name" {
+  description = "ECR repository name for Solr"
+  type        = string
+  default     = "solr"
+}
+
+variable "ecr_redis_repo_name" {
+  description = "ECR repository name for Redis"
+  type        = string
+  default     = "redis"
+}
+
+variable "image_tag" {
+  description = "Docker image tag to deploy"
+  type        = string
+  default     = "latest"
+}

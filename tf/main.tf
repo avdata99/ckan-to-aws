@@ -25,19 +25,36 @@ module "security_groups" {
 module "rds" {
   source = "./modules/rds"
 
-  project_id                = var.project_id
-  environment               = var.environment
-  vpc_id                    = module.vpc.vpc_id
-  db_subnet_ids             = var.db_subnet_ids
-  security_group_id         = module.security_groups.rds_sg_id
-  instance_class            = var.db_instance_class
-  allocated_storage         = var.db_allocated_storage
-  engine_version            = var.db_engine_version
-  db_name                   = var.db_name
-  username                  = var.db_username
-  password                  = var.db_password
-  multi_az                  = var.db_multi_az
-  backup_retention_period   = var.db_backup_retention_days
-  deletion_protection       = var.db_deletion_protection
-  storage_encrypted         = var.db_encryption_enabled
+  project_id              = var.project_id
+  environment             = var.environment
+  vpc_id                  = module.vpc.vpc_id
+  db_subnet_ids           = var.db_subnet_ids
+  security_group_id       = module.security_groups.rds_sg_id
+  instance_class          = var.db_instance_class
+  allocated_storage       = var.db_allocated_storage
+  engine_version          = var.db_engine_version
+  db_name                 = var.db_name
+  username                = var.db_username
+  password                = var.db_password
+  multi_az                = var.db_multi_az
+  backup_retention_period = var.db_backup_retention_days
+  deletion_protection     = var.db_deletion_protection
+  storage_encrypted       = var.db_encryption_enabled
+}
+
+module "ecs_cluster" {
+  source = "./modules/ecs-cluster"
+
+  project_id  = var.project_id
+  environment = var.environment
+}
+
+module "ecr" {
+  source = "./modules/ecr"
+
+  project_id         = var.project_id
+  environment        = var.environment
+  ckan_repo_name     = var.ecr_ckan_repo_name
+  solr_repo_name     = var.ecr_solr_repo_name
+  redis_repo_name    = var.ecr_redis_repo_name
 }

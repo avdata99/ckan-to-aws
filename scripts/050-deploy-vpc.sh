@@ -30,10 +30,11 @@ environment = "$ENVIRONMENT"
 aws_region  = "$AWS_REGION"
 create_vpc  = ${CREATE_VPC:-true}
 allowed_cidr_blocks = ${ALLOWED_CIDR_BLOCKS:-'["0.0.0.0/0"]'}
+
 # Database configuration
 db_instance_class         = "${DB_INSTANCE_CLASS:-db.t3.micro}"
 db_allocated_storage      = ${DB_ALLOCATED_STORAGE:-20}
-db_engine_version         = "${DB_ENGINE_VERSION:-15.4}"
+db_engine_version         = "${DB_ENGINE_VERSION:-15}"
 db_name                   = "${DB_NAME:-ckan}"
 db_username               = "${DB_USERNAME:-ckan_admin}"
 db_password               = "${DB_PASSWORD}"
@@ -41,6 +42,21 @@ db_multi_az               = ${DB_MULTI_AZ:-false}
 db_backup_retention_days  = ${DB_BACKUP_RETENTION_DAYS:-7}
 db_deletion_protection    = ${DB_DELETION_PROTECTION:-false}
 db_encryption_enabled     = ${DB_ENCRYPTION_ENABLED:-true}
+
+# ECS configuration
+ecs_launch_type     = "${ECS_LAUNCH_TYPE:-FARGATE}"
+ckan_task_cpu       = ${CKAN_TASK_CPU:-512}
+ckan_task_memory    = ${CKAN_TASK_MEMORY:-1024}
+solr_task_cpu       = ${SOLR_TASK_CPU:-256}
+solr_task_memory    = ${SOLR_TASK_MEMORY:-512}
+redis_task_cpu      = ${REDIS_TASK_CPU:-256}
+redis_task_memory   = ${REDIS_TASK_MEMORY:-512}
+
+# ECR configuration
+ecr_ckan_repo_name  = "${ECR_CKAN_REPO_NAME:-ckan}"
+ecr_solr_repo_name  = "${ECR_SOLR_REPO_NAME:-solr}"
+ecr_redis_repo_name = "${ECR_REDIS_REPO_NAME:-redis}"
+image_tag           = "${IMAGE_TAG:-latest}"
 EOF
 
 # Only add VPC IDs if they are defined (for using existing VPC)
