@@ -129,5 +129,32 @@ Terraform will show you the execution plan and prompt you for confirmation. Revi
 
 > **How does this work?** The script uses `terraform plan -target=module.vpc`. The `-target` flag tells Terraform to *only* create/update the resources defined in the `vpc` module in `tf/main.tf`, ignoring everything else. This gives us precise control over the deployment process.
 
+> **Note:** This script also generates the `terraform.tfvars` file with all your configuration. If you update your `.env` file later (e.g., change `ALLOWED_CIDR_BLOCKS`), simply re-run this script. Terraform will detect that the VPC hasn't changed and only update the tfvars file. It's safe to run multiple times.
+
+### Step 2: Deploy Security Groups
+
+This step creates all the security groups needed for your infrastructure. Security groups act as virtual firewalls that control traffic between your resources.
+
+**Important:** Security Groups are **always created new**, even when reusing an existing VPC. This is standard practice because:
+- Security Groups are application-specific (they define the exact ports your app needs)
+- They reference each other (e.g., CKAN can talk to RDS, ALB can talk to CKAN)
+- Each application should have isolated security rules for better security
+- The client typically provides VPC/subnets but not Security Groups
+
+```bash
+./scripts/060-deploy-security-groups.sh
+```
+
+The script will create security groups for:
+- **ALB**: Allows HTTP/HTTPS from the internet (or restricted IPs if configured)
+- **CKAN ECS Tasks**: Allows traffic from ALB on port 5000
+- **Solr ECS Tasks**: Allows traffic from CKAN on port 8983
+- **RDS**: Allows PostgreSQL connections from CKAN on port 5432
+- **Redis**: Allows Redis connections from CKAN on port 6379
+
+> **Customizing access:** By default, the ALB accepts traffic from anywhere (`0.0.0.0/0`). To restrict access to specific IP ranges, edit the `ALLOWED_CIDR_BLOCKS` variable in your `.env` file, then **re-run `050-deploy-vpc.sh`** to update the configuration. For example: `ALLOWED_CIDR_BLOCKS='["203.0.113.0/24", "198.51.100.0/24"]'`
+
+> **Why this order?** Security groups only depend on the VPC and have no other dependencies. By creating them now, we can reference them in subsequent steps (RDS, Redis, ECS, ALB) without circular dependencies.
+
 ---
-*Next steps will include deploying the database and supporting services, each with its own targeted script.*
+*Next steps will include deploying the database (RDS) and cache (Redis), each with its own targeted script.*

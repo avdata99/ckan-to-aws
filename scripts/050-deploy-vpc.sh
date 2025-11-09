@@ -29,6 +29,7 @@ project_id  = "$UNIQUE_PROJECT_ID"
 environment = "$ENVIRONMENT"
 aws_region  = "$AWS_REGION"
 create_vpc  = ${CREATE_VPC:-true}
+allowed_cidr_blocks = ${ALLOWED_CIDR_BLOCKS:-'["0.0.0.0/0"]'}
 EOF
 
 # Only add VPC IDs if they are defined (for using existing VPC)
