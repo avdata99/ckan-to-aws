@@ -114,10 +114,10 @@ resource "aws_security_group" "rds" {
   }
 }
 
-# Security Group for ElastiCache (Redis)
+# Security Group for Redis ECS Task (not ElastiCache!)
 resource "aws_security_group" "redis" {
-  name        = "${var.project_id}-${var.environment}-redis-sg"
-  description = "Security group for ElastiCache Redis"
+  name        = "${var.project_id}-${var.environment}-redis-ecs-sg"
+  description = "Security group for Redis ECS task"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -137,6 +137,6 @@ resource "aws_security_group" "redis" {
   }
 
   tags = {
-    Name = "${var.project_id}-${var.environment}-redis-sg"
+    Name = "${var.project_id}-${var.environment}-redis-ecs-sg"
   }
 }

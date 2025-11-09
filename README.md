@@ -150,11 +150,23 @@ The script will create security groups for:
 - **CKAN ECS Tasks**: Allows traffic from ALB on port 5000
 - **Solr ECS Tasks**: Allows traffic from CKAN on port 8983
 - **RDS**: Allows PostgreSQL connections from CKAN on port 5432
-- **Redis**: Allows Redis connections from CKAN on port 6379
+- **Redis ECS Task**: Allows Redis connections from CKAN on port 6379 (simple container, not ElastiCache)
+
+> **Note on Redis:** We're using a simple Redis/Valkey container running in ECS, **not** AWS ElastiCache. This is much cheaper (~$3-4/month vs ~$12+/month) and perfectly fine for dev/small deployments.
 
 > **Customizing access:** By default, the ALB accepts traffic from anywhere (`0.0.0.0/0`). To restrict access to specific IP ranges, edit the `ALLOWED_CIDR_BLOCKS` variable in your `.env` file, then **re-run `050-deploy-vpc.sh`** to update the configuration. For example: `ALLOWED_CIDR_BLOCKS='["203.0.113.0/24", "198.51.100.0/24"]'`
 
-> **Why this order?** Security groups only depend on the VPC and have no other dependencies. By creating them now, we can reference them in subsequent steps (RDS, Redis, ECS, ALB) without circular dependencies.
+> **Why this order?** Security groups only depend on the VPC and have no other dependencies. By creating them now, we can reference them in subsequent steps (RDS, ECS, ALB) without circular dependencies.
+
+### Step 3: Deploy RDS (PostgreSQL Database)
+
+This step creates a managed PostgreSQL database using Amazon RDS.
+
+```bash
+./scripts/070-deploy-rds.sh
+```
+
+**Note:** RDS provisioning typically takes 10-15 minutes. This is the only managed AWS service we're using for data storage. Redis and Solr run as simple ECS containers to keep costs low.
 
 ---
-*Next steps will include deploying the database (RDS) and cache (Redis), each with its own targeted script.*
+*Next step: Deploy the ECS Cluster to run your containers.*

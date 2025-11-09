@@ -19,6 +19,6 @@ output "rds_sg_id" {
 }
 
 output "redis_sg_id" {
-  description = "Security Group ID for Redis"
+  description = "Security Group ID for Redis ECS task"
   value       = aws_security_group.redis.id
 }
