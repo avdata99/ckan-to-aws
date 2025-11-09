@@ -30,6 +30,17 @@ environment = "$ENVIRONMENT"
 aws_region  = "$AWS_REGION"
 create_vpc  = ${CREATE_VPC:-true}
 allowed_cidr_blocks = ${ALLOWED_CIDR_BLOCKS:-'["0.0.0.0/0"]'}
+# Database configuration
+db_instance_class         = "${DB_INSTANCE_CLASS:-db.t3.micro}"
+db_allocated_storage      = ${DB_ALLOCATED_STORAGE:-20}
+db_engine_version         = "${DB_ENGINE_VERSION:-15.4}"
+db_name                   = "${DB_NAME:-ckan}"
+db_username               = "${DB_USERNAME:-ckan_admin}"
+db_password               = "${DB_PASSWORD}"
+db_multi_az               = ${DB_MULTI_AZ:-false}
+db_backup_retention_days  = ${DB_BACKUP_RETENTION_DAYS:-7}
+db_deletion_protection    = ${DB_DELETION_PROTECTION:-false}
+db_encryption_enabled     = ${DB_ENCRYPTION_ENABLED:-true}
 EOF
 
 # Only add VPC IDs if they are defined (for using existing VPC)
@@ -41,6 +52,9 @@ if [[ -n "$PUBLIC_SUBNET_IDS" ]]; then
 fi
 if [[ -n "$PRIVATE_SUBNET_IDS" ]]; then
   echo "private_subnet_ids = $PRIVATE_SUBNET_IDS" >> terraform.tfvars
+fi
+if [[ -n "$DB_SUBNET_IDS" ]]; then
+  echo "db_subnet_ids = $DB_SUBNET_IDS" >> terraform.tfvars
 fi
 
 # Initialize Terraform. This is required to register the backend and any new modules.
