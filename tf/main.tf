@@ -99,16 +99,15 @@ module "ecs_tasks" {
   alb_dns_name = module.alb.alb_dns_name
 }
 
-module "ecs_services_backend" {
-  source = "./modules/ecs-services-backend"
+module "ecs_service_all_in_one" {
+  source = "./modules/ecs-service-all-in-one"
 
-  project_id                  = var.project_id
-  environment                 = var.environment
-  vpc_id                      = module.vpc.vpc_id
-  cluster_id                  = module.ecs_cluster.cluster_id
-  services_task_definition_arn = module.ecs_tasks.services_task_definition_arn
-  private_subnet_ids          = module.vpc.private_subnet_ids
-  solr_security_group_id      = module.security_groups.solr_ecs_sg_id
-  redis_security_group_id     = module.security_groups.redis_sg_id
-  desired_count               = 1
+  project_id             = var.project_id
+  environment            = var.environment
+  cluster_id             = module.ecs_cluster.cluster_id
+  task_definition_arn    = module.ecs_tasks.all_in_one_task_definition_arn
+  private_subnet_ids     = module.vpc.private_subnet_ids
+  ckan_security_group_id = module.security_groups.ckan_ecs_sg_id
+  alb_target_group_arn   = module.alb.ckan_target_group_arn
+  desired_count          = 1  # Start with 0 tasks
 }

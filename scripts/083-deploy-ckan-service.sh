@@ -2,7 +2,7 @@
 set -e
 
 echo "========================================"
-echo "Deploying ECS Task Definitions"
+echo "Deploying CKAN Service"
 echo "========================================"
 
 # Load environment variables
@@ -22,24 +22,28 @@ fi
 # Initialize Terraform
 "$SCRIPT_DIR/030-terraform-init.sh"
 
-echo "Planning ECS Task Definitions deployment (targeting module.ecs_tasks)..."
-terraform plan -out=tfplan -target=module.ecs_tasks
+echo "Planning CKAN Service deployment (targeting module.ecs_services_ckan)..."
+terraform plan -out=tfplan -target=module.ecs_services_ckan
 
-echo "Applying ECS Task Definitions deployment..."
+echo "Applying CKAN Service deployment..."
 echo "Terraform will now ask for confirmation. Review the plan and type 'yes' to approve."
 terraform apply tfplan
 
 echo ""
 echo "========================================"
-echo "ECS Task Definitions Deployment Complete!"
+echo "CKAN Service Deployment Complete!"
 echo "========================================"
 echo ""
-echo "Task Definition created:"
-echo "  - All-in-One Task (CKAN + Solr + Redis using localhost)"
+echo "CKAN is now starting up..."
+echo "This may take 3-5 minutes for the first deployment."
 echo ""
-echo "Next step: Deploy the ECS service"
-echo "Run: ./scripts/084-deploy-all-in-one-service.sh"
+echo "Access your CKAN application at:"
+terraform output -raw alb_url
 echo ""
-echo "The service will be created with 0 tasks initially."
-echo "After deployment, you can start it with desired_count=1"
+echo ""
+echo "To check service status:"
+echo "  aws ecs describe-services --cluster ${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-cluster --services ${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-ckan-service --region ${AWS_REGION} ${AWS_PROFILE:+--profile ${AWS_PROFILE}}"
+echo ""
+echo "To view logs:"
+echo "  aws logs tail /ecs/${UNIQUE_PROJECT_ID}-${ENVIRONMENT} --follow --region ${AWS_REGION} ${AWS_PROFILE:+--profile ${AWS_PROFILE}}"
 echo "========================================"

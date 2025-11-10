@@ -1,11 +1,6 @@
-output "ckan_task_definition_arn" {
-  description = "ARN of CKAN task definition"
-  value       = aws_ecs_task_definition.ckan.arn
-}
-
-output "services_task_definition_arn" {
-  description = "ARN of services task definition (Solr + Redis)"
-  value       = aws_ecs_task_definition.services.arn
+output "all_in_one_task_definition_arn" {
+  description = "ARN of all-in-one task definition (CKAN + Solr + Redis)"
+  value       = aws_ecs_task_definition.all_in_one.arn
 }
 
 output "ecs_task_execution_role_arn" {

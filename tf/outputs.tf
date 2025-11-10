@@ -1,32 +1,35 @@
+# VPC Information
 output "vpc_id" {
-  description = "ID of the VPC used for the deployment"
+  description = "VPC ID"
   value       = module.vpc.vpc_id
 }
 
 output "public_subnet_ids" {
-  description = "List of public subnet IDs"
+  description = "Public subnet IDs"
   value       = module.vpc.public_subnet_ids
 }
 
 output "private_subnet_ids" {
-  description = "List of private subnet IDs"
+  description = "Private subnet IDs"
   value       = module.vpc.private_subnet_ids
 }
 
-# ECR Repository URLs
-output "ecr_ckan_repository_url" {
-  description = "ECR repository URL for CKAN"
-  value       = module.ecr.ckan_repository_url
+# Database Information
+output "database" {
+  description = "Database connection information"
+  value = {
+    endpoint = module.rds.db_endpoint
+    address  = module.rds.db_address
+    port     = module.rds.db_port
+    name     = module.rds.db_name
+  }
+  sensitive = false
 }
 
-output "ecr_solr_repository_url" {
-  description = "ECR repository URL for Solr"
-  value       = module.ecr.solr_repository_url
-}
-
-output "ecr_redis_repository_url" {
-  description = "ECR repository URL for Redis"
-  value       = module.ecr.redis_repository_url
+output "database_connection_string" {
+  description = "PostgreSQL connection string (without password)"
+  value       = "postgresql://${var.db_username}:PASSWORD@${module.rds.db_address}:${module.rds.db_port}/${module.rds.db_name}"
+  sensitive   = false
 }
 
 # ALB Information
@@ -45,29 +48,30 @@ output "ckan_target_group_arn" {
   value       = module.alb.ckan_target_group_arn
 }
 
-# ECS Task Definitions
-output "ckan_task_definition_arn" {
-  description = "ARN of CKAN task definition"
-  value       = module.ecs_tasks.ckan_task_definition_arn
+# ECR Repository URLs
+output "ecr_ckan_repository_url" {
+  description = "ECR repository URL for CKAN"
+  value       = module.ecr.ckan_repository_url
 }
 
-output "services_task_definition_arn" {
-  description = "ARN of services task definition (Solr + Redis)"
-  value       = module.ecs_tasks.services_task_definition_arn
+output "ecr_solr_repository_url" {
+  description = "ECR repository URL for Solr"
+  value       = module.ecr.solr_repository_url
 }
 
-# Backend Services
-output "backend_service_name" {
-  description = "Name of backend services (Solr + Redis)"
-  value       = module.ecs_services_backend.service_name
+output "ecr_redis_repository_url" {
+  description = "ECR repository URL for Redis"
+  value       = module.ecr.redis_repository_url
 }
 
-output "solr_dns_name" {
-  description = "Service discovery DNS name for Solr"
-  value       = module.ecs_services_backend.solr_dns_name
+# ECS Task Definition
+output "all_in_one_task_definition_arn" {
+  description = "ARN of all-in-one task definition (CKAN + Solr + Redis)"
+  value       = module.ecs_tasks.all_in_one_task_definition_arn
 }
 
-output "redis_dns_name" {
-  description = "Service discovery DNS name for Redis"
-  value       = module.ecs_services_backend.redis_dns_name
+# ECS Service
+output "ckan_service_name" {
+  description = "Name of CKAN ECS service"
+  value       = module.ecs_service_all_in_one.service_name
 }
