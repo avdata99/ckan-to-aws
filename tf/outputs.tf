@@ -44,3 +44,30 @@ output "ckan_target_group_arn" {
   description = "Target group ARN for CKAN service"
   value       = module.alb.ckan_target_group_arn
 }
+
+# ECS Task Definitions
+output "ckan_task_definition_arn" {
+  description = "ARN of CKAN task definition"
+  value       = module.ecs_tasks.ckan_task_definition_arn
+}
+
+output "services_task_definition_arn" {
+  description = "ARN of services task definition (Solr + Redis)"
+  value       = module.ecs_tasks.services_task_definition_arn
+}
+
+# Backend Services
+output "backend_service_name" {
+  description = "Name of backend services (Solr + Redis)"
+  value       = module.ecs_services_backend.service_name
+}
+
+output "solr_dns_name" {
+  description = "Service discovery DNS name for Solr"
+  value       = module.ecs_services_backend.solr_dns_name
+}
+
+output "redis_dns_name" {
+  description = "Service discovery DNS name for Redis"
+  value       = module.ecs_services_backend.redis_dns_name
+}

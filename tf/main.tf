@@ -68,3 +68,47 @@ module "alb" {
   public_subnet_ids      = module.vpc.public_subnet_ids
   alb_security_group_id  = module.security_groups.alb_sg_id
 }
+
+module "ecs_tasks" {
+  source = "./modules/ecs-tasks"
+
+  project_id              = var.project_id
+  environment             = var.environment
+  aws_region              = var.aws_region
+  ecr_ckan_repository_url = module.ecr.ckan_repository_url
+  ecr_solr_repository_url = module.ecr.solr_repository_url
+  ecr_redis_repository_url = module.ecr.redis_repository_url
+  image_tag               = var.image_tag
+  log_group_name          = module.ecs_cluster.log_group_name
+  
+  # Database connection
+  db_endpoint  = module.rds.db_endpoint
+  db_name      = var.db_name
+  db_username  = var.db_username
+  db_password  = var.db_password
+  
+  # Task resources
+  ckan_task_cpu    = var.ckan_task_cpu
+  ckan_task_memory = var.ckan_task_memory
+  solr_task_cpu    = var.solr_task_cpu
+  solr_task_memory = var.solr_task_memory
+  redis_task_cpu   = var.redis_task_cpu
+  redis_task_memory = var.redis_task_memory
+  
+  # ALB DNS for CKAN_SITE_URL
+  alb_dns_name = module.alb.alb_dns_name
+}
+
+module "ecs_services_backend" {
+  source = "./modules/ecs-services-backend"
+
+  project_id                  = var.project_id
+  environment                 = var.environment
+  vpc_id                      = module.vpc.vpc_id
+  cluster_id                  = module.ecs_cluster.cluster_id
+  services_task_definition_arn = module.ecs_tasks.services_task_definition_arn
+  private_subnet_ids          = module.vpc.private_subnet_ids
+  solr_security_group_id      = module.security_groups.solr_ecs_sg_id
+  redis_security_group_id     = module.security_groups.redis_sg_id
+  desired_count               = 1
+}
