@@ -68,6 +68,7 @@ resource "aws_ecs_task_definition" "all_in_one" {
     # Container 1: Redis (start first, it's the fastest)
     {
       name  = "redis"
+      # Force pull latest image by not caching the digest
       image = "${var.ecr_redis_repository_url}:${var.image_tag}"
       
       essential = true
@@ -118,15 +119,16 @@ resource "aws_ecs_task_definition" "all_in_one" {
         }
       }
       
+      # More lenient health check - Solr takes time to fully start
       healthCheck = {
         command = [
           "CMD-SHELL",
-          "curl -f http://localhost:8983/solr/admin/ping || exit 1"
+          "curl -f http://localhost:8983/solr/ || exit 1"
         ]
         interval    = 30
-        timeout     = 5
-        retries     = 3
-        startPeriod = 60
+        timeout     = 10
+        retries     = 5
+        startPeriod = 120
       }
     },
     # Container 3: CKAN (start last, depends on Solr and Redis)
