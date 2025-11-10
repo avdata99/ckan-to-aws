@@ -28,3 +28,19 @@ output "ecr_redis_repository_url" {
   description = "ECR repository URL for Redis"
   value       = module.ecr.redis_repository_url
 }
+
+# ALB Information
+output "alb_dns_name" {
+  description = "ALB DNS name - use this to access your CKAN application"
+  value       = module.alb.alb_dns_name
+}
+
+output "alb_url" {
+  description = "Full URL to access CKAN"
+  value       = "http://${module.alb.alb_dns_name}"
+}
+
+output "ckan_target_group_arn" {
+  description = "Target group ARN for CKAN service"
+  value       = module.alb.ckan_target_group_arn
+}
