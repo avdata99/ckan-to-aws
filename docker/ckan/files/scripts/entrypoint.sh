@@ -1,11 +1,9 @@
 #!/bin/bash -e
 
-# load env vars from ${APP_DIR}/.env
-set -o allexport
-. ${APP_DIR}/.env
-set +o allexport
-
 echo "Executing entrypoint.sh"
+
+# Setup runtime environment (AWS Secrets Manager or .env file)
+source ${APP_DIR}/files/scripts/setup-runtime-env.sh
 
 # The CKAN PostgreSQL image creates the database and user
 # https://github.com/ckan/ckan-postgres-dev/blob/main/Dockerfile

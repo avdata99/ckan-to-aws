@@ -40,25 +40,20 @@ variable "log_group_name" {
 }
 
 # Database connection info
-variable "db_endpoint" {
-  description = "RDS database endpoint"
-  type        = string
-}
-
 variable "db_name" {
   description = "Database name"
   type        = string
 }
 
-variable "db_username" {
-  description = "Database username"
+variable "app_secret_arn" {
+  description = "ARN of the secret containing all application secrets"
   type        = string
 }
 
-variable "db_password" {
-  description = "Database password"
+variable "db_secret_arn" {
+  description = "ARN of the secret containing database credentials"
   type        = string
-  sensitive   = true
+  default     = ""
 }
 
 # Task resources

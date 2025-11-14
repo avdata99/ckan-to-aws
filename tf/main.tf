@@ -72,27 +72,27 @@ module "alb" {
 module "ecs_tasks" {
   source = "./modules/ecs-tasks"
 
-  project_id              = var.project_id
-  environment             = var.environment
-  aws_region              = var.aws_region
-  ecr_ckan_repository_url = module.ecr.ckan_repository_url
-  ecr_solr_repository_url = module.ecr.solr_repository_url
+  project_id               = var.project_id
+  environment              = var.environment
+  aws_region               = var.aws_region
+  ecr_ckan_repository_url  = module.ecr.ckan_repository_url
+  ecr_solr_repository_url  = module.ecr.solr_repository_url
   ecr_redis_repository_url = module.ecr.redis_repository_url
-  image_tag               = var.image_tag
-  log_group_name          = module.ecs_cluster.log_group_name
+  image_tag                = var.image_tag
+  log_group_name           = module.ecs_cluster.log_group_name
   
-  # Database connection
-  db_endpoint  = module.rds.db_endpoint
-  db_name      = var.db_name
-  db_username  = var.db_username
-  db_password  = var.db_password
+  # Secret ARN for all application secrets
+  app_secret_arn = data.aws_secretsmanager_secret.app_secrets.arn
+  
+  # Non-sensitive configuration
+  db_name = var.db_name
   
   # Task resources
-  ckan_task_cpu    = var.ckan_task_cpu
-  ckan_task_memory = var.ckan_task_memory
-  solr_task_cpu    = var.solr_task_cpu
-  solr_task_memory = var.solr_task_memory
-  redis_task_cpu   = var.redis_task_cpu
+  ckan_task_cpu     = var.ckan_task_cpu
+  ckan_task_memory  = var.ckan_task_memory
+  solr_task_cpu     = var.solr_task_cpu
+  solr_task_memory  = var.solr_task_memory
+  redis_task_cpu    = var.redis_task_cpu
   redis_task_memory = var.redis_task_memory
   
   # ALB DNS for CKAN_SITE_URL
@@ -110,4 +110,9 @@ module "ecs_service_all_in_one" {
   ckan_security_group_id = module.security_groups.ckan_ecs_sg_id
   alb_target_group_arn   = module.alb.ckan_target_group_arn
   desired_count          = 1  # Start with 0 tasks
+}
+
+# Data source to get the secret ARN
+data "aws_secretsmanager_secret" "app_secrets" {
+  name = "${var.project_id}-${var.environment}-secrets"
 }

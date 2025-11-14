@@ -19,6 +19,26 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+# Policy to allow reading secrets
+resource "aws_iam_role_policy" "ecs_task_execution_secrets" {
+  role = aws_iam_role.ecs_task_execution.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = [
+          "arn:aws:secretsmanager:${var.aws_region}:*:secret:${var.project_id}-${var.environment}-*"
+        ]
+      }
+    ]
+  })
+}
+
 # IAM Role for ECS Tasks (runtime permissions)
 resource "aws_iam_role" "ecs_task" {
   name = "${var.project_id}-${var.environment}-ecs-task"
@@ -37,15 +57,7 @@ resource "aws_iam_role" "ecs_task" {
 
 # Extract hostname from RDS endpoint (remove port)
 locals {
-  db_host = split(":", var.db_endpoint)[0]
-  db_port = "5432"
-  
-  # Build connection strings using localhost for Solr and Redis
-  sqlalchemy_url = "postgresql://${var.db_username}:${var.db_password}@${local.db_host}:${local.db_port}/${var.db_name}"
-  datastore_write_url = "postgresql://${var.db_username}:${var.db_password}@${local.db_host}:${local.db_port}/datastore"
-  datastore_read_url = "postgresql://${var.db_username}:${var.db_password}@${local.db_host}:${local.db_port}/datastore"
-  
-  # Use localhost since all containers are in the same task
+  # Use localhost for Solr and Redis since they're in the same task
   solr_url = "http://localhost:8983/solr/ckan"
   redis_url = "redis://localhost:6379/0"
   
@@ -143,20 +155,9 @@ resource "aws_ecs_task_definition" "all_in_one" {
         protocol      = "tcp"
       }]
       
-      # CRITICAL: Runtime environment variables override the baked-in values
+      # NON-SENSITIVE environment variables (safe to be in plain text)
       environment = [
-        {
-          name  = "SQLALCHEMY_URL"
-          value = local.sqlalchemy_url
-        },
-        {
-          name  = "DATASTORE_WRITE_URL"
-          value = local.datastore_write_url
-        },
-        {
-          name  = "DATASTORE_READ_URL"
-          value = local.datastore_read_url
-        },
+        # Services (localhost since they're in same task)
         {
           name  = "SOLR_URL"
           value = local.solr_url
@@ -172,6 +173,67 @@ resource "aws_ecs_task_definition" "all_in_one" {
         {
           name  = "CKAN_STORAGE_PATH"
           value = "/var/lib/ckan/storage"
+        },
+        # Non-sensitive database info
+        {
+          name  = "DB_PORT"
+          value = "5432"
+        },
+        {
+          name  = "DB_NAME"
+          value = var.db_name
+        },
+        {
+          name  = "DATASTORE_DB"
+          value = "datastore"
+        }
+      ]
+      
+      # ALL SENSITIVE values from Secrets Manager
+      secrets = [
+        # Main database credentials
+        {
+          name      = "DB_HOST"
+          valueFrom = "${var.app_secret_arn}:db_host::"
+        },
+        {
+          name      = "DB_USERNAME"
+          valueFrom = "${var.app_secret_arn}:db_username::"
+        },
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = "${var.app_secret_arn}:db_password::"
+        },
+        # Datastore write user
+        {
+          name      = "DATASTORE_WRITE_USER"
+          valueFrom = "${var.app_secret_arn}:datastore_write_user::"
+        },
+        {
+          name      = "DATASTORE_WRITE_PASSWORD"
+          valueFrom = "${var.app_secret_arn}:datastore_write_password::"
+        },
+        # Datastore read user
+        {
+          name      = "DATASTORE_READ_USER"
+          valueFrom = "${var.app_secret_arn}:datastore_read_user::"
+        },
+        {
+          name      = "DATASTORE_READ_PASSWORD"
+          valueFrom = "${var.app_secret_arn}:datastore_read_password::"
+        },
+        # CKAN application secrets
+        {
+          name      = "SECRET_KEY"
+          valueFrom = "${var.app_secret_arn}:secret_key::"
+        },
+        {
+          name      = "BEAKER_SESSION_SECRET"
+          valueFrom = "${var.app_secret_arn}:beaker_session_secret::"
+        },
+        {
+          name      = "BEAKER_SESSION_VALIDATE_KEY"
+          valueFrom = "${var.app_secret_arn}:beaker_session_validate_key::"
         }
       ]
       
