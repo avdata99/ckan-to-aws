@@ -73,7 +73,7 @@ docker build \
 
 echo "Pushing CKAN image to ECR..."
 docker push "$CKAN_REPO:$IMAGE_TAG"
-echo "✓ CKAN image pushed successfully"
+echo "CKAN image pushed successfully"
 echo ""
 
 # ============================================================================
@@ -92,7 +92,7 @@ docker build \
 
 echo "Pushing Solr image to ECR..."
 docker push "$SOLR_REPO:$IMAGE_TAG"
-echo "✓ Solr image pushed successfully"
+echo "Solr image pushed successfully"
 echo ""
 
 # ============================================================================
@@ -111,7 +111,7 @@ docker build \
 
 echo "Pushing Redis image to ECR..."
 docker push "$REDIS_REPO:$IMAGE_TAG"
-echo "✓ Redis image pushed successfully"
+echo "Redis image pushed successfully"
 echo ""
 
 # ============================================================================

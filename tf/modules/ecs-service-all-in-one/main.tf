@@ -18,26 +18,22 @@ resource "aws_ecs_service" "all_in_one" {
     container_port   = 5000
   }
 
-  # Circuit breaker configuration
+  health_check_grace_period_seconds = 300
+
+  enable_execute_command = false
+
   deployment_circuit_breaker {
     enable   = true
     rollback = true
   }
 
-  # Deployment configuration
-  deployment_configuration {
-    maximum_percent         = 200
-    minimum_healthy_percent = 0
-  }
-
-  # Give CKAN plenty of time to start up before checking health
-  health_check_grace_period_seconds = 300
+  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 0
 
   tags = {
     Name = "${var.project_id}-${var.environment}-ckan-service"
   }
 
-  # Allow external changes to desired_count (for manual scaling/stopping)
   lifecycle {
     ignore_changes = [desired_count]
   }

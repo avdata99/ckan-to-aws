@@ -16,10 +16,10 @@ module "vpc" {
 module "security_groups" {
   source = "./modules/security-groups"
 
-  project_id           = var.project_id
-  environment          = var.environment
-  vpc_id               = module.vpc.vpc_id
-  allowed_cidr_blocks  = var.allowed_cidr_blocks
+  project_id          = var.project_id
+  environment         = var.environment
+  vpc_id              = module.vpc.vpc_id
+  allowed_cidr_blocks = var.allowed_cidr_blocks
 }
 
 module "rds" {
@@ -52,21 +52,21 @@ module "ecs_cluster" {
 module "ecr" {
   source = "./modules/ecr"
 
-  project_id         = var.project_id
-  environment        = var.environment
-  ckan_repo_name     = var.ecr_ckan_repo_name
-  solr_repo_name     = var.ecr_solr_repo_name
-  redis_repo_name    = var.ecr_redis_repo_name
+  project_id      = var.project_id
+  environment     = var.environment
+  ckan_repo_name  = var.ecr_ckan_repo_name
+  solr_repo_name  = var.ecr_solr_repo_name
+  redis_repo_name = var.ecr_redis_repo_name
 }
 
 module "alb" {
   source = "./modules/alb"
 
-  project_id             = var.project_id
-  environment            = var.environment
-  vpc_id                 = module.vpc.vpc_id
-  public_subnet_ids      = module.vpc.public_subnet_ids
-  alb_security_group_id  = module.security_groups.alb_sg_id
+  project_id            = var.project_id
+  environment           = var.environment
+  vpc_id                = module.vpc.vpc_id
+  public_subnet_ids     = module.vpc.public_subnet_ids
+  alb_security_group_id = module.security_groups.alb_sg_id
 }
 
 module "ecs_tasks" {
@@ -80,13 +80,13 @@ module "ecs_tasks" {
   ecr_redis_repository_url = module.ecr.redis_repository_url
   image_tag                = var.image_tag
   log_group_name           = module.ecs_cluster.log_group_name
-  
+
   # Secret ARN for all application secrets
   app_secret_arn = data.aws_secretsmanager_secret.app_secrets.arn
-  
+
   # Non-sensitive configuration
   db_name = var.db_name
-  
+
   # Task resources
   ckan_task_cpu     = var.ckan_task_cpu
   ckan_task_memory  = var.ckan_task_memory
@@ -94,7 +94,7 @@ module "ecs_tasks" {
   solr_task_memory  = var.solr_task_memory
   redis_task_cpu    = var.redis_task_cpu
   redis_task_memory = var.redis_task_memory
-  
+
   # ALB DNS for CKAN_SITE_URL
   alb_dns_name = module.alb.alb_dns_name
 }
@@ -109,7 +109,7 @@ module "ecs_service_all_in_one" {
   private_subnet_ids     = module.vpc.private_subnet_ids
   ckan_security_group_id = module.security_groups.ckan_ecs_sg_id
   alb_target_group_arn   = module.alb.ckan_target_group_arn
-  desired_count          = 1  # Start with 0 tasks
+  desired_count          = 1 # Start with 0 tasks
 }
 
 # Data source to get the secret ARN

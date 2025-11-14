@@ -133,9 +133,9 @@ echo "Deployment Changes:"
 echo "   Previous task definition: revision $PREVIOUS_REVISION"
 echo "   New task definition:      revision $NEW_REVISION"
 if [ "$PREVIOUS_REVISION" != "$NEW_REVISION" ]; then
-  echo "   ✅ Task definition changed - new code/config deployed"
+  echo "Task definition changed - new code/config deployed"
 else
-  echo "   ⚠️  Task definition unchanged - forcing container restart"
+  echo "Task definition unchanged - forcing container restart"
 fi
 echo ""
 echo "Service Update:"

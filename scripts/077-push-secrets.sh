@@ -17,16 +17,19 @@ echo ""
 
 # Get RDS endpoint from Terraform if available
 echo "Checking if RDS exists to get endpoint..."
-TF_DIR="$(cd "$SCRIPT_DIR/../tf" && pwd)"
-cd "$TF_DIR"
+RDS_ENDPOINT=$(aws rds describe-db-instances \
+  --db-instance-identifier ${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-db \
+  --region $AWS_REGION \
+  $AWS_PROFILE_OPTION \
+  --query 'DBInstances[0].Endpoint.Address' \
+  --output text 2>/dev/null || echo "")
 
-RDS_ENDPOINT=$(terraform output -raw db_endpoint 2>/dev/null || echo "")
 if [ -n "$RDS_ENDPOINT" ]; then
     DB_HOST=$(echo "$RDS_ENDPOINT" | cut -d':' -f1)
     echo "Found RDS endpoint: $DB_HOST"
 else
     DB_HOST="will-be-set-by-terraform"
-    echo "⚠ RDS not yet deployed, using placeholder"
+    echo "RDS not yet deployed, using placeholder"
 fi
 
 # Build the secret JSON with ALL application secrets
