@@ -1,7 +1,8 @@
 pdfview
-datapusher-plus
-api-tracking
-announcements
-push-errors
-core-tracking
-core-datastore
+# datapusher-plus
+# Error in tracking
+# core-tracking
+# api-tracking
+# announcements
+# push-errors
+# core-datastore

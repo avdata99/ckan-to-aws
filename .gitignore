@@ -1,8 +1,23 @@
 # Our ignores
-# terraform configuration variables file
-terraform/terraform.tfvars
 # Local environment variables
 .env
+
+# Terraform temporary files and local state
+# These should be generated locally and never committed.
+tf/terraform.tfvars
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+# Ignore plan files
+*.tfplan
+tfplan
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
