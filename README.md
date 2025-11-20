@@ -38,7 +38,9 @@ Install required tools:
 
 ```bash
 # Install AWS CLI (required for ECR login and Terraform AWS provider)
-sudo apt install awscli
+uv venv
+source .venv/bin/activate
+uv pip install awscli 
 
 # Verify installation
 aws --version
