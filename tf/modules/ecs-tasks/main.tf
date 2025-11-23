@@ -174,6 +174,14 @@ resource "aws_ecs_task_definition" "all_in_one" {
           name  = "CKAN_STORAGE_PATH"
           value = "/var/lib/ckan/storage"
         },
+        {
+          name  = "CKAN_STORAGE_FOLDER"
+          value = "storage"
+        },
+        {
+          name  = "ENV_NAME"
+          value = "AWS"
+        },
         # Non-sensitive database info
         {
           name  = "DB_PORT"
