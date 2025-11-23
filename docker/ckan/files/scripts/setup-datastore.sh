@@ -2,13 +2,10 @@
 set -e
 
 # DB_USERNAME and DB_PASSWORD are the root PSQL users
+# Environment variables are already set by setup-runtime-env.sh
+# DO NOT load .env here as it would overwrite AWS Secrets Manager values
 echo "Starting Datastore Setup"
 cd $APP_DIR
-
-# load env vars from ${APP_DIR}/.env
-set -o allexport
-. ${APP_DIR}/.env
-set +o allexport
 
 export PGPASSWORD=$DB_PASSWORD
 # Create the CKAN DB, there is no psql_user
@@ -25,7 +22,7 @@ psql -h $DB_HOST -U $DB_USERNAME -d postgres -c "CREATE DATABASE $DATASTORE_DB_N
 echo "Granting ownership of datastore database to write user"
 psql -h $DB_HOST -U $DB_USERNAME -d postgres -c "ALTER DATABASE $DATASTORE_DB_NAME OWNER TO $DATASTORE_WRITE_USERNAME;"
 
-echo "Datastore set-permissions"
-ckan datastore set-permissions 2>/dev/null | psql -q -d $DATASTORE_WRITE_URL --set ON_ERROR_STOP=1
+echo "Datastore set-permissions for $DATASTORE_WRITE_URL"
+ckan datastore set-permissions 2>/dev/null | psql -q $DATASTORE_WRITE_URL --set ON_ERROR_STOP=1
 
 echo "Datastore Setup Complete"

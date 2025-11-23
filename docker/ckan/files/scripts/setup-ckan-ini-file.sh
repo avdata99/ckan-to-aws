@@ -1,10 +1,7 @@
 #!/bin/bash -e
 
-# load env vars from ${APP_DIR}/.env
-set -o allexport
-. ${APP_DIR}/.env
-set +o allexport
-
+# Environment variables are already set by setup-runtime-env.sh (when called from entrypoint.sh)
+# DO NOT load .env here as it would overwrite AWS Secrets Manager values with build-time placeholders
 echo "Setting up configuration file for $ENV_NAME environment"
 source ${APP_DIR}/venv/bin/activate
 cd $APP_DIR
