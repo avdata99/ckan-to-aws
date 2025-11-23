@@ -182,6 +182,23 @@ resource "aws_ecs_task_definition" "all_in_one" {
           name  = "ENV_NAME"
           value = "AWS"
         },
+        {
+          name  = "CKAN_DEBUG"
+          value = "false"
+        },
+        # Sysadmin TODO
+        {
+          name  = "CKAN_SYSADMIN_USER"
+          value = "ckan_admin"
+        },
+        {
+          name  = "CKAN_SYSADMIN_PASS"
+          value = "testpass"
+        },
+        {
+          name  = "CKAN_SYSADMIN_MAIL"
+          value = "ckan_admin@localhost"
+        },
         # Non-sensitive database info
         {
           name  = "DB_PORT"
