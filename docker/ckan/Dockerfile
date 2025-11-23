@@ -62,6 +62,7 @@ COPY extensions ${APP_DIR}/extensions
 RUN useradd -m -s /bin/bash ckan
 RUN chown ckan -R ${APP_DIR}
 RUN chown ckan -R /var/log/supervisor
+RUN chown ckan -R /var/lib/ckan
 USER ckan
 
 # Install CKAN
