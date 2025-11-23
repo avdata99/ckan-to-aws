@@ -109,4 +109,5 @@ echo "************************************************"
 # This avoid cloud providers to panic thinking CKAN is not running and they need
 # to restart it.
 # You can stop/restart CKAN without any cloud provider intervention
+touch /var/log/supervisor/test.log
 tail -f /var/log/supervisor/*.log

@@ -61,7 +61,7 @@ COPY extensions ${APP_DIR}/extensions
 # Create the ckan user
 RUN useradd -m -s /bin/bash ckan
 RUN chown ckan -R ${APP_DIR}
-RUN chown ckan -R /var/log/supervisor
+RUN mkdir -p /var/log/supervisor && chown ckan -R /var/log/supervisor
 # TODO ensure we use ckan_storage setting
 RUN mkdir -p /var/lib/ckan/storage && chown -R ckan:ckan /var/lib/ckan
 USER ckan

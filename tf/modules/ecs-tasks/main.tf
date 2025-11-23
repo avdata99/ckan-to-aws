@@ -186,6 +186,11 @@ resource "aws_ecs_task_definition" "all_in_one" {
           name  = "CKAN_DEBUG"
           value = "false"
         },
+        # To force new ECS update
+        {
+          name  = "ECS_VERSION"
+          value = "10"
+        },
         # Sysadmin TODO
         {
           name  = "CKAN_SYSADMIN_USER"
