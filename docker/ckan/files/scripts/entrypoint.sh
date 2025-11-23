@@ -5,6 +5,12 @@ echo "Executing entrypoint.sh"
 # Setup runtime environment (AWS Secrets Manager or .env file)
 source ${APP_DIR}/files/scripts/setup-runtime-env.sh
 
+# Re-run ckan.ini setup with runtime configuration (real database URLs, secrets from AWS)
+# This updates the ini file that was initially configured at build time with placeholders
+echo "Updating ckan.ini with runtime configuration..."
+bash ${APP_DIR}/files/scripts/setup-ckan-ini-file.sh
+echo "ckan.ini updated with runtime configuration"
+
 # The CKAN PostgreSQL image creates the database and user
 # https://github.com/ckan/ckan-postgres-dev/blob/main/Dockerfile
 # Wait for the database to be ready

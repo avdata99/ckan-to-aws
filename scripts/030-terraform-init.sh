@@ -21,6 +21,9 @@ else
 fi
 
 # Base init command
+# NOTE: If you get a "Backend configuration changed" error, you need to manually run:
+#   terraform init -migrate-state -backend-config=... (to migrate existing state)
+#   OR terraform init -reconfigure -backend-config=... (to start fresh, loses state!)
 INIT_CMD="terraform init -backend-config=\"bucket=$TF_STATE_BUCKET\" -backend-config=\"key=$TF_STATE_KEY\" -backend-config=\"region=$AWS_REGION\" -backend-config=\"encrypt=true\""
 
 # Conditionally add DynamoDB table for state locking
