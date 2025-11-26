@@ -189,7 +189,7 @@ resource "aws_ecs_task_definition" "all_in_one" {
         # To force new ECS update
         {
           name  = "ECS_VERSION"
-          value = "10"
+          value = "9"
         },
         # Sysadmin TODO
         {
