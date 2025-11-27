@@ -1,6 +1,7 @@
 # Our ignores
 # Local environment variables
 .env
+.env.generated
 
 # Terraform temporary files and local state
 # These should be generated locally and never committed.
