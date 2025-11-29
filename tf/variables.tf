@@ -125,37 +125,37 @@ variable "ecs_launch_type" {
 variable "ckan_task_cpu" {
   description = "CPU units for CKAN task"
   type        = number
-  default     = 512
+  default     = 2048
 }
 
 variable "ckan_task_memory" {
   description = "Memory (MB) for CKAN task"
   type        = number
-  default     = 1024
+  default     = 2048
 }
 
 variable "solr_task_cpu" {
   description = "CPU units for Solr task"
   type        = number
-  default     = 256
+  default     = 1024
 }
 
 variable "solr_task_memory" {
   description = "Memory (MB) for Solr task"
   type        = number
-  default     = 512
+  default     = 1024
 }
 
 variable "redis_task_cpu" {
   description = "CPU units for Redis task"
   type        = number
-  default     = 256
+  default     = 1024
 }
 
 variable "redis_task_memory" {
   description = "Memory (MB) for Redis task"
   type        = number
-  default     = 512
+  default     = 1024
 }
 
 variable "ecr_ckan_repo_name" {

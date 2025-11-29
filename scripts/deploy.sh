@@ -148,12 +148,12 @@ db_encryption_enabled     = ${DB_ENCRYPTION_ENABLED:-true}
 
 # ECS configuration
 ecs_launch_type     = "${ECS_LAUNCH_TYPE:-FARGATE}"
-ckan_task_cpu       = ${CKAN_TASK_CPU:-512}
-ckan_task_memory    = ${CKAN_TASK_MEMORY:-1024}
-solr_task_cpu       = ${SOLR_TASK_CPU:-256}
-solr_task_memory    = ${SOLR_TASK_MEMORY:-512}
-redis_task_cpu      = ${REDIS_TASK_CPU:-256}
-redis_task_memory   = ${REDIS_TASK_MEMORY:-512}
+ckan_task_cpu       = ${CKAN_TASK_CPU:-2048}
+ckan_task_memory    = ${CKAN_TASK_MEMORY:-2048}
+solr_task_cpu       = ${SOLR_TASK_CPU:-1024}
+solr_task_memory    = ${SOLR_TASK_MEMORY:-1024}
+redis_task_cpu      = ${REDIS_TASK_CPU:-1024}
+redis_task_memory   = ${REDIS_TASK_MEMORY:-1024}
 
 # ECR configuration
 ecr_ckan_repo_name  = "${ECR_CKAN_REPO_NAME:-ckan}"

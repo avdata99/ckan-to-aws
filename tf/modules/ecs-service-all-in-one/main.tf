@@ -20,7 +20,7 @@ resource "aws_ecs_service" "all_in_one" {
 
   health_check_grace_period_seconds = 300
 
-  enable_execute_command = false
+  enable_execute_command = true
 
   deployment_circuit_breaker {
     enable   = true

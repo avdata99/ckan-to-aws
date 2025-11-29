@@ -19,6 +19,13 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+resource "aws_iam_role_policy_attachment" "ssm_managed_instance_core" {
+  # This allow us to use ECS Exec (running commands in the container)
+  # This replaces SSH
+  role       = aws_iam_role.ecs_task_execution.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 # Policy to allow reading secrets
 resource "aws_iam_role_policy" "ecs_task_execution_secrets" {
   role = aws_iam_role.ecs_task_execution.id
@@ -189,7 +196,7 @@ resource "aws_ecs_task_definition" "all_in_one" {
         # To force new ECS update
         {
           name  = "ECS_VERSION"
-          value = "9"
+          value = "11"
         },
         # Sysadmin TODO
         {
