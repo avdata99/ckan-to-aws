@@ -181,3 +181,9 @@ variable "image_tag" {
   type        = string
   default     = "latest"
 }
+
+variable "ecs_health_check_grace_period" {
+  description = "Seconds to wait before checking health of a new ECS task"
+  type        = number
+  default     = 300
+}
