@@ -102,14 +102,15 @@ module "ecs_tasks" {
 module "ecs_service_all_in_one" {
   source = "./modules/ecs-service-all-in-one"
 
-  project_id             = var.project_id
-  environment            = var.environment
-  cluster_id             = module.ecs_cluster.cluster_id
-  task_definition_arn    = module.ecs_tasks.all_in_one_task_definition_arn
-  private_subnet_ids     = module.vpc.private_subnet_ids
-  ckan_security_group_id = module.security_groups.ckan_ecs_sg_id
-  alb_target_group_arn   = module.alb.ckan_target_group_arn
-  desired_count          = 1 # Start with 0 tasks
+  project_id                  = var.project_id
+  environment                 = var.environment
+  cluster_id                  = module.ecs_cluster.cluster_id
+  task_definition_arn         = module.ecs_tasks.all_in_one_task_definition_arn
+  private_subnet_ids          = module.vpc.private_subnet_ids
+  ckan_security_group_id      = module.security_groups.ckan_ecs_sg_id
+  alb_target_group_arn        = module.alb.ckan_target_group_arn
+  desired_count               = 1
+  health_check_grace_period   = var.ecs_health_check_grace_period
 }
 
 # Data source to get the secret ARN

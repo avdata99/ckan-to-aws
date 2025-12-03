@@ -8,165 +8,187 @@ This guide provides step-by-step instructions to deploy the CKAN application on 
 - **AWS CLI**: Install and configure the AWS CLI with your credentials.
 - **Docker**: Install Docker to build and manage container images.
 - **Terraform**: Install Terraform to manage infrastructure as code.
+- **jq**: Install jq for JSON processing (`apt install jq` or `brew install jq`).
 
-## Step 1: Prepare Your Workspace
+## Quick Start
 
-## Getting Started: Setting Up the Terraform Backend
+1. Copy `.env.sample` to `.env` and configure your values
+2. Run the full deployment: `./scripts/deploy.sh`
+3. Start the service when ready (command shown at end of deployment)
 
-Before you can deploy any infrastructure, you must set up a "remote backend".
-This is a one-time process that creates an S3 bucket to store your Terraform state file
-(its memory of your infrastructure) and a DynamoDB table to prevent conflicts when working in a team.
+## Configuration
 
-### Instructions:
+### Step 1: Prepare Your Environment
 
-1.  **Configure Your Environment**:
-    -   Copy the `/.env.sample` file to a new file named `/.env`.
-    -   Open `/.env` and fill in the values, especially `TF_STATE_BUCKET`. **This bucket name must be globally unique.**
+1. **Copy the sample configuration**:
+   ```bash
+   cp .env.sample .env
+   ```
 
-2.  **Run the Backend Setup Script**:
-    -   This script reads your `.env` file and creates the required AWS resources.
-    ```bash
-    ./scripts/010-setup-backend.sh
-    ```
-    You'll see something like this upon successful completion:
-    ```
-    ========================================
-    Terraform Backend Setup
-    ========================================
-    Setting up environment...
-    Loading environment variables from /home/user/dev/ckan-to-aws/.env
-    Checking requirements...
-    Using AWS profile: your-custom-profile
-    AWS Account ID: XXXXXXXXXXX
-    ECR Registry: XXXXXXXXXXX.dkr.ecr.us-east-2.amazonaws.com
-    Environment setup complete for your project your-unique-id
-    Environment: dev
-    Region: us-east-2
-    Account: XXXXXXXXXXX
-    ECR Registry: XXXXXXXXXXX.dkr.ecr.us-east-2.amazonaws.com
-    Checking for S3 bucket: ckan-to-aws-tf-state-your-unique-id...
-    S3 bucket not found. Creating it...
-    {
-        "Location": "http://ckan-to-aws-tf-state-your-unique-id.s3.amazonaws.com/"
-    }
-    S3 bucket created.
-    Enabling versioning on S3 bucket...
-    Versioning enabled.
-    ```
+2. **Edit `.env`** and update the following required values:
+   - `UNIQUE_PROJECT_ID`: A unique identifier for your project (no underscores, must be globally unique for S3)
+   - `AWS_PROFILE`: Your AWS CLI profile name
+   - `AWS_REGION`: Target AWS region
+   - `DB_PASSWORD`: A secure password for the database
 
-3.  **Initialize Terraform**:
-    -   Run the `030-terraform-init.sh` script. This script reads your `.env` file and correctly
-    configures Terraform to use your S3 backend.
-    ```bash
-    ./scripts/030-terraform-init.sh
-    ```
+### Step 2: Deploy Everything
 
-    You should see output similar to this:
-    ```
-    ========================================
-    Terraform Initialization
-    ========================================
-    Setting up environment...
-    Loading environment variables from /homeuser/dev/ckan-to-aws/.env
-    Checking requirements...
-    Using AWS profile: your-custom-profile
-    AWS Account ID: XXXXXXXXXXx
-    ECR Registry: XXXXXXXXXXx.dkr.ecr.us-east-2.amazonaws.com
-    Environment setup complete for your project you-project-internal-id
-    Environment: dev
-    Region: us-east-2
-    Account: XXXXXXXXXXx
-    ECR Registry: XXXXXXXXXXx.dkr.ecr.us-east-2.amazonaws.com
-    Initializing Terraform with S3 backend...
-    Using AWS Profile: your-custom-profile
-    WARNING: State locking with DynamoDB is disabled.
-    Initializing the backend...
-    Initializing provider plugins...
-    - Finding hashicorp/aws versions matching "~> 5.0"...
-    - Installing hashicorp/aws v5.100.0...
-    - Installed hashicorp/aws v5.100.0 (signed by HashiCorp)
-    Terraform has created a lock file .terraform.lock.hcl to record the provider
-    selections it made above. Include this file in your version control repository
-    so that Terraform can guarantee to make the same selections by default when
-    you run "terraform init" in the future.
-
-    Terraform has been successfully initialized!
-
-    You may now begin working with Terraform. Try running "terraform plan" to see
-    any changes that are required for your infrastructure. All Terraform commands
-    should now work.
-
-    If you ever set or change modules or backend configuration for Terraform,
-    rerun this command to reinitialize your working directory. If you forget, other
-    commands will detect it and remind you to do so if necessary.
-    ========================================
-    Terraform initialized successfully!
-    ========================================
-
-    ```
-
-    Running `terraform init` **did not** create anything in AWS or push a state file to S3. It only did the following on your local machine:
-    -   Verified it can connect to your S3 backend.
-    -   Downloaded the necessary AWS provider plugin.
-    -   Created a `.terraform.lock.hcl` file to lock the provider version.
-
-    Your S3 bucket is still empty. The state file will only be created the first time you run `terraform apply`.
-
-
-> **How does this work?** The `tf/backend.tf` file tells Terraform *that* we are using an S3 backend, but it's intentionally left without details. The `030-terraform-init.sh` script provides those missing details (bucket name, region, etc.) from your `.env` file when it runs `terraform init`. This is the standard, secure way to configure a backend without hardcoding values.
-
-After these steps, your project is correctly configured to manage its state remotely. You are now ready to start defining and deploying your infrastructure.
-
-### Step 1: Deploy the Network (VPC)
-
-This step deploys the foundational network. It can either create a new VPC or use an existing one, based on the `CREATE_VPC` variable in your `.env` file.
+Run the full deployment script:
 
 ```bash
-./scripts/050-deploy-vpc.sh
+./scripts/deploy.sh
 ```
 
-Terraform will show you the execution plan and prompt you for confirmation. Review the changes and type `yes` to proceed.
+This single script performs all deployment steps in order:
 
-> **How does this work?** The script uses `terraform plan -target=module.vpc`. The `-target` flag tells Terraform to *only* create/update the resources defined in the `vpc` module in `tf/main.tf`, ignoring everything else. This gives us precise control over the deployment process.
+1. **Backend Setup** - Creates S3 bucket and DynamoDB table for Terraform state
+2. **Terraform Init** - Initializes Terraform with the S3 backend
+3. **VPC Deployment** - Creates or configures the network
+4. **Security Groups** - Creates firewall rules for all components
+5. **RDS Deployment** - Creates the PostgreSQL database (~10-15 minutes)
+6. **ECR Repositories** - Creates container registries
+7. **Docker Build & Push** - Builds and pushes CKAN, Solr, and Redis images
+8. **Secrets Manager** - Stores all application secrets securely
+9. **ECS Cluster** - Creates the container orchestration cluster
+10. **ECS Task Definitions** - Defines how containers should run
+11. **ALB Deployment** - Creates the Application Load Balancer
+12. **ECS Service** - Creates the service (starts with 0 tasks)
 
-> **Note:** This script also generates the `terraform.tfvars` file with all your configuration. If you update your `.env` file later (e.g., change `ALLOWED_CIDR_BLOCKS`), simply re-run this script. Terraform will detect that the VPC hasn't changed and only update the tfvars file. It's safe to run multiple times.
+### Step 3: Start the Application
 
-### Step 2: Deploy Security Groups
-
-This step creates all the security groups needed for your infrastructure. Security groups act as virtual firewalls that control traffic between your resources.
-
-**Important:** Security Groups are **always created new**, even when reusing an existing VPC. This is standard practice because:
-- Security Groups are application-specific (they define the exact ports your app needs)
-- They reference each other (e.g., CKAN can talk to RDS, ALB can talk to CKAN)
-- Each application should have isolated security rules for better security
-- The client typically provides VPC/subnets but not Security Groups
+After deployment completes, start the ECS service:
 
 ```bash
-./scripts/060-deploy-security-groups.sh
+aws ecs update-service \
+  --cluster YOUR_PROJECT_ID-dev-cluster \
+  --service YOUR_PROJECT_ID-dev-ckan \
+  --desired-count 1 \
+  --region us-east-2 \
+  --profile your-aws-profile
 ```
 
-The script will create security groups for:
-- **ALB**: Allows HTTP/HTTPS from the internet (or restricted IPs if configured)
-- **CKAN ECS Tasks**: Allows traffic from ALB on port 5000
-- **Solr ECS Tasks**: Allows traffic from CKAN on port 8983
-- **RDS**: Allows PostgreSQL connections from CKAN on port 5432
-- **Redis ECS Task**: Allows Redis connections from CKAN on port 6379 (simple container, not ElastiCache)
+### Step 4: Monitor and Access
 
-> **Note on Redis:** We're using a simple Redis/Valkey container running in ECS, **not** AWS ElastiCache. This is much cheaper (~$3-4/month vs ~$12+/month) and perfectly fine for dev/small deployments.
+**Watch the logs**:
+```bash
+aws logs tail /ecs/YOUR_PROJECT_ID-dev --follow --region us-east-2 --profile your-aws-profile
+```
 
-> **Customizing access:** By default, the ALB accepts traffic from anywhere (`0.0.0.0/0`). To restrict access to specific IP ranges, edit the `ALLOWED_CIDR_BLOCKS` variable in your `.env` file, then **re-run `050-deploy-vpc.sh`** to update the configuration. For example: `ALLOWED_CIDR_BLOCKS='["203.0.113.0/24", "198.51.100.0/24"]'`
+**Force a new deployment** (to pull latest images):
+```bash
+aws ecs update-service \
+  --cluster YOUR_PROJECT_ID-dev-cluster \
+  --service YOUR_PROJECT_ID-dev-ckan \
+  --force-new-deployment \
+  --region us-east-2 \
+  --profile your-aws-profile
+```
 
-> **Why this order?** Security groups only depend on the VPC and have no other dependencies. By creating them now, we can reference them in subsequent steps (RDS, ECS, ALB) without circular dependencies.
+**Access your CKAN instance** at the ALB URL shown at the end of deployment.
 
-### Step 3: Deploy RDS (PostgreSQL Database)
+## Architecture Overview
 
-This step creates a managed PostgreSQL database using Amazon RDS.
+The deployment creates an "all-in-one" ECS task that runs:
+- **CKAN** (port 5000) - The main application
+- **Solr** (port 8983) - Search engine
+- **Redis** (port 6379) - Caching layer
+
+All three containers run in the same task and communicate via `localhost`.
+
+**AWS Resources Created**:
+- VPC with public/private subnets (or uses existing VPC)
+- Security Groups for ALB, ECS, and RDS
+- RDS PostgreSQL instance
+- ECR repositories for container images
+- ECS Cluster (Fargate)
+- Application Load Balancer
+- Secrets Manager secret for credentials
+- CloudWatch Log Group
+
+## Configuration Options
+
+### Using an Existing VPC
+
+Set in your `.env`:
+```bash
+CREATE_VPC=false
+VPC_ID="vpc-xxxxxxxxxxxxxxxxx"
+PUBLIC_SUBNET_IDS='["subnet-xxx", "subnet-yyy"]'
+PRIVATE_SUBNET_IDS='["subnet-zzz", "subnet-aaa"]'
+DB_SUBNET_IDS='["subnet-bbb", "subnet-ccc"]'
+```
+
+### Restricting Access
+
+By default, the ALB is open to the internet. To restrict access:
+```bash
+ALLOWED_CIDR_BLOCKS='["203.0.113.0/24", "198.51.100.0/24"]'
+```
+
+### Resource Sizing
+
+Adjust CPU/memory for your workload:
+```bash
+CKAN_TASK_CPU=2048      # 2 vCPU
+CKAN_TASK_MEMORY=4096   # 4 GB
+```
+
+### Database Configuration
 
 ```bash
-./scripts/070-deploy-rds.sh
+DB_INSTANCE_CLASS=db.t3.medium  # Larger instance for production
+DB_MULTI_AZ=true                # High availability (doubles cost)
+DB_DELETION_PROTECTION=true     # Prevent accidental deletion
 ```
 
-**Note:** RDS provisioning typically takes 10-15 minutes. This is the only managed AWS service we're using for data storage. Redis and Solr run as simple ECS containers to keep costs low.
+### Health Check Configuration
 
----
-*Next step: Deploy the ECS Cluster to run your containers.*
+CKAN takes time to initialize. If tasks are being killed before they're ready:
+```bash
+# Increase grace period (default: 300 seconds = 5 minutes)
+ECS_HEALTH_CHECK_GRACE_PERIOD=600
+```
+
+## Troubleshooting
+
+### Task fails to start
+1. Check CloudWatch logs: `aws logs tail /ecs/YOUR_PROJECT_ID-dev --follow`
+2. Verify the RDS security group allows connections from ECS
+3. Ensure secrets are correctly stored in Secrets Manager
+
+### ALB shows unhealthy targets
+1. Wait 2-3 minutes for CKAN to fully initialize
+2. Check if the task is running: `aws ecs describe-services --cluster YOUR_CLUSTER --services YOUR_SERVICE`
+3. Verify the health check path (`/api/3/action/status_show`) is accessible
+
+### Database connection errors
+1. Verify RDS is running and accessible
+2. Check the secrets in AWS Secrets Manager contain correct values
+3. Ensure the RDS security group allows traffic from the CKAN security group
+
+## Costs
+
+Estimated monthly costs (us-east-2, minimal configuration):
+- **RDS db.t3.micro**: ~$15/month
+- **Fargate (2 vCPU, 4GB)**: ~$60/month
+- **ALB**: ~$20/month
+- **NAT Gateway**: ~$35/month (if creating new VPC)
+- **ECR/S3/Secrets**: <$5/month
+
+**Total**: ~$130-150/month for a minimal dev environment
+
+## Cleanup
+
+To destroy all resources:
+```bash
+./scripts/destroy.sh
+```
+
+**Options**:
+```bash
+./scripts/destroy.sh --dry-run      # Show what would be destroyed
+./scripts/destroy.sh --force        # Skip confirmation prompts
+./scripts/destroy.sh --keep-state   # Keep S3 state bucket
+```
+
+**Warning**: This will delete all data including the RDS database. Make sure to backup any important data first.

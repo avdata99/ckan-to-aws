@@ -277,7 +277,7 @@ REDIS_REPO=$(terraform output -raw ecr_redis_repository_url 2>/dev/null || echo 
 
 if [ -z "$CKAN_REPO" ] || [ -z "$SOLR_REPO" ] || [ -z "$REDIS_REPO" ]; then
   echo "Error: Could not get ECR repository URLs."
-  echo "Please run './scripts/075-deploy-ecr.sh' first to create ECR repositories."
+  echo "Please create ECR repositories."
   exit 1
 fi
 
@@ -524,7 +524,24 @@ echo "========================================"
 echo "ECS Cluster Deployment Complete!"
 echo "========================================"
 
-# 10. Deploy ECS Task Definitions
+# 10. Deploy Application Load Balancer (before ECS tasks, as tasks need ALB DNS)
+echo "========================================"
+echo "Deploying Application Load Balancer (ALB)"
+echo "========================================"
+
+echo "Planning ALB deployment (targeting module.alb)..."
+terraform plan -out=tfplan -target=module.alb
+
+echo "Applying ALB deployment..."
+echo "Terraform will now ask for confirmation. Review the plan and type 'yes' to approve."
+terraform apply tfplan
+
+echo ""
+echo "========================================"
+echo "ALB Deployment Complete!"
+echo "========================================"
+
+# 11. Deploy ECS Task Definitions (after ALB, needs alb_dns_name)
 echo "========================================"
 echo "Deploying ECS Task Definitions"
 echo "========================================"
@@ -545,38 +562,6 @@ echo "Task Definition created:"
 echo "  - All-in-One Task (CKAN + Solr + Redis using localhost)"
 echo "========================================"
 
-
-# 11. Deploy Application Load Balancer
-echo "========================================"
-echo "Deploying Application Load Balancer (ALB)"
-echo "========================================"
-
-echo "Planning ALB deployment (targeting module.alb)..."
-terraform plan -out=tfplan -target=module.alb
-
-echo "Applying ALB deployment..."
-echo "Terraform will now ask for confirmation. Review the plan and type 'yes' to approve."
-terraform apply tfplan
-
-echo ""
-echo "========================================"
-echo "ALB Deployment Complete!"
-echo "========================================"
-echo ""
-echo "Your Application Load Balancer is ready!"
-echo ""
-echo "ALB DNS Name:"
-terraform output -raw alb_dns_name
-echo ""
-echo ""
-echo "Access URL (once CKAN is deployed):"
-terraform output -raw alb_url
-echo ""
-echo ""
-echo "Note: The ALB is ready but has no healthy targets yet."
-echo "========================================"
-
-
 # 12. Deploy All-in-One ECS Service (CKAN+Solr+Redis)
 echo "========================================"
 echo "Deploying All-in-One Service (CKAN + Solr + Redis)"
@@ -594,13 +579,13 @@ echo "========================================"
 echo "All-in-One Service Deployed!"
 echo "========================================"
 echo ""
-echo "Service created with desired_count = 0 (no tasks running yet)"
+echo "Service deployed with desired_count = 1"
 echo ""
-echo "To start the service, run:"
+echo "To force a new deployment (pull latest images):"
 echo "  aws ecs update-service \\"
 echo "    --cluster ${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-cluster \\"
 echo "    --service ${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-ckan \\"
-echo "    --desired-count 1 \\"
+echo "    --force-new-deployment \\"
 echo "    --region ${AWS_REGION} \\"
 echo "    ${AWS_PROFILE:+--profile ${AWS_PROFILE}}"
 echo ""
@@ -616,5 +601,14 @@ echo "========================================"
 echo "========================================"
 echo "Full deployment complete!"
 echo "========================================"
-echo "You can now start the ECS service if desired."
-echo "See the output above for the ALB URL and next steps."
+echo ""
+echo "ALB URL:"
+terraform output -raw alb_url
+echo ""
+echo ""
+echo "Note: It may take 3-5 minutes for CKAN to become healthy."
+echo "Monitor progress with:"
+echo "  aws logs tail /ecs/${UNIQUE_PROJECT_ID}-${ENVIRONMENT} --follow --region ${AWS_REGION} ${AWS_PROFILE:+--profile ${AWS_PROFILE}}"
+echo ""
+echo "To destroy all resources, run:"
+echo "  ./scripts/destroy.sh"
