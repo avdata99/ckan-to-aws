@@ -211,7 +211,7 @@ resource "aws_ecs_task_definition" "all_in_one" {
         # To force new ECS update
         {
           name  = "ECS_VERSION"
-          value = "12"
+          value = "14"
         },
         # Sysadmin TODO
         {
@@ -318,7 +318,7 @@ resource "aws_ecs_task_definition" "all_in_one" {
         interval    = 60
         timeout     = 10
         retries     = 5
-        startPeriod = 180
+        startPeriod = 600  # 10 minutes to allow full initialization
       }
     }
   ])

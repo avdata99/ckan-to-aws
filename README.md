@@ -221,3 +221,18 @@ Since ECS Fargate doesn't support traditional SSH, we use **ECS Exec** to run co
 ./scripts/tools/ecs-exec.sh "/usr/bin/bash" solr
 ./scripts/tools/ecs-exec.sh "/usr/bin/bash" redis
 ```
+
+### Just update CKAN instance
+
+If you apply changes in the CKAN container (like installing extensions), you can force a new deployment to apply those changes:
+
+```bash
+./scripts/redeploy.sh
+```
+
+or for other containers:
+
+```bash
+./scripts/redeploy.sh solr
+./scripts/redeploy.sh redis
+```
