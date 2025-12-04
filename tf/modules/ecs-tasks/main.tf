@@ -318,7 +318,7 @@ resource "aws_ecs_task_definition" "all_in_one" {
         interval    = 60
         timeout     = 10
         retries     = 5
-        startPeriod = 600  # 10 minutes to allow full initialization
+        startPeriod = 300  # 300 is max!
       }
     }
   ])
