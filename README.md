@@ -218,6 +218,6 @@ Since ECS Fargate doesn't support traditional SSH, we use **ECS Exec** to run co
 ./scripts/tools/ecs-exec.sh "ls -la /var/lib/ckan"
 
 # Connect to a different container (solr or redis)
-./scripts/tools/ecs-exec.sh "/bin/sh" solr
-./scripts/tools/ecs-exec.sh "/bin/sh" redis
+./scripts/tools/ecs-exec.sh "/usr/bin/bash" solr
+./scripts/tools/ecs-exec.sh "/usr/bin/bash" redis
 ```

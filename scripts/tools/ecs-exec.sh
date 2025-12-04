@@ -39,8 +39,8 @@ fi
 TASK_ID=$(echo "$TASK_ARN" | awk -F'/' '{print $NF}')
 echo "Found task: $TASK_ID"
 
-# Default command is /bin/sh (more compatible than /bin/bash)
-CMD="${1:-/bin/sh}"
+# Default command is /usr/bin/bash (more compatible than /bin/bash)
+CMD="${1:-/usr/bin/bash}"
 
 echo "Connecting to container '$CONTAINER_NAME'..."
 echo ""
