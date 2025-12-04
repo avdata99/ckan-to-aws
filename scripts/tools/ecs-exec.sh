@@ -1,39 +1,56 @@
 #!/bin/bash
-set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/env-setup.sh"
+
+# Source env-setup but don't exit on error
+source "$SCRIPT_DIR/env-setup.sh" || {
+  echo "Failed to load environment. Make sure .env is configured."
+  exit 1
+}
 
 CLUSTER_NAME="${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-cluster"
 SERVICE_NAME="${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-ckan"
-CONTAINER_NAME="ckan"
+CONTAINER_NAME="${2:-ckan}"
 REGION="${AWS_REGION}"
-PROFILE_OPTION="${AWS_PROFILE:+--profile ${AWS_PROFILE}}"
+
+# Build profile option
+PROFILE_OPT=""
+if [ -n "$AWS_PROFILE" ]; then
+  PROFILE_OPT="--profile $AWS_PROFILE"
+fi
 
 # Get the running task ID for the CKAN service
-TASK_ID=$(aws ecs list-tasks \
+echo "Finding running task in cluster $CLUSTER_NAME..."
+TASK_ARN=$(aws ecs list-tasks \
+  $PROFILE_OPT \
+  --region "$REGION" \
   --cluster "$CLUSTER_NAME" \
   --service-name "$SERVICE_NAME" \
   --desired-status RUNNING \
-  --region "$REGION" \
-  $PROFILE_OPTION \
   --query 'taskArns[0]' \
   --output text)
 
-if [ "$TASK_ID" == "None" ] || [ -z "$TASK_ID" ]; then
-  echo "No running CKAN task found in service $SERVICE_NAME."
-  # exit 0
+if [ "$TASK_ARN" == "None" ] || [ -z "$TASK_ARN" ]; then
+  echo "No running task found in service $SERVICE_NAME."
+  exit 1
 fi
 
-# Default command is /bin/bash, but allow override
-CMD="${1:-/bin/bash}"
+# Extract task ID from ARN
+TASK_ID=$(echo "$TASK_ARN" | awk -F'/' '{print $NF}')
+echo "Found task: $TASK_ID"
 
-echo "Running ECS Exec into container '$CONTAINER_NAME' in task '$TASK_ID'..."
+# Default command is /bin/sh (more compatible than /bin/bash)
+CMD="${1:-/bin/sh}"
+
+echo "Connecting to container '$CONTAINER_NAME'..."
+echo ""
+
+# aws ecs execute-command --profile gob-cba-pre-1 --region us-east-2 
 aws ecs execute-command \
+  $PROFILE_OPT \
+  --region "$REGION" \
   --cluster "$CLUSTER_NAME" \
   --task "$TASK_ID" \
   --container "$CONTAINER_NAME" \
-  --command "$CMD" \
   --interactive \
-  --region "$REGION" \
-  $PROFILE_OPTION
+  --command "$CMD"

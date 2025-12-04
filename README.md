@@ -192,3 +192,32 @@ To destroy all resources:
 ```
 
 **Warning**: This will delete all data including the RDS database. Make sure to backup any important data first.
+
+## SSH into Containers (ECS Exec)
+
+Since ECS Fargate doesn't support traditional SSH, we use **ECS Exec** to run commands inside containers. This is similar to `docker exec`.
+
+### Prerequisites
+
+1. Install the Session Manager plugin for AWS CLI:
+   ```bash
+   # Ubuntu/Debian
+   curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+   sudo dpkg -i session-manager-plugin.deb
+   ```
+
+2. Make sure your `.env` file is configured with the correct AWS profile and project settings.
+
+### Using the Script
+
+```bash
+# Open an interactive shell in the CKAN container
+./scripts/tools/ecs-exec.sh
+
+# Run a specific command
+./scripts/tools/ecs-exec.sh "ls -la /var/lib/ckan"
+
+# Connect to a different container (solr or redis)
+./scripts/tools/ecs-exec.sh "/bin/sh" solr
+./scripts/tools/ecs-exec.sh "/bin/sh" redis
+```
