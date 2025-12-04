@@ -19,13 +19,6 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-resource "aws_iam_role_policy_attachment" "ssm_managed_instance_core" {
-  # This allow us to use ECS Exec (running commands in the container)
-  # This replaces SSH
-  role       = aws_iam_role.ecs_task_execution.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
 # Policy to allow reading secrets
 resource "aws_iam_role_policy" "ecs_task_execution_secrets" {
   role = aws_iam_role.ecs_task_execution.id
@@ -59,6 +52,28 @@ resource "aws_iam_role" "ecs_task" {
         Service = "ecs-tasks.amazonaws.com"
       }
     }]
+  })
+}
+
+# ECS Exec requires SSM permissions on the TASK role (not execution role)
+resource "aws_iam_role_policy" "ecs_exec_policy" {
+  name = "${var.project_id}-${var.environment}-ecs-exec"
+  role = aws_iam_role.ecs_task.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel"
+        ]
+        Resource = "*"
+      }
+    ]
   })
 }
 
@@ -196,7 +211,7 @@ resource "aws_ecs_task_definition" "all_in_one" {
         # To force new ECS update
         {
           name  = "ECS_VERSION"
-          value = "11"
+          value = "12"
         },
         # Sysadmin TODO
         {

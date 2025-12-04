@@ -38,3 +38,9 @@ variable "desired_count" {
   type        = number
   default     = 0
 }
+
+variable "health_check_grace_period" {
+  description = "Seconds to wait before starting health checks on a new task"
+  type        = number
+  default     = 600
+}

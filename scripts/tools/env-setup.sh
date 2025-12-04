@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+# NOTE: Do NOT use "set -e" here because this script is meant to be sourced
+# and set -e would cause the user's terminal to close on any error
 
 echo "Setting up environment..."
 

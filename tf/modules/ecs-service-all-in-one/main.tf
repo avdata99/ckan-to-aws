@@ -18,7 +18,7 @@ resource "aws_ecs_service" "all_in_one" {
     container_port   = 5000
   }
 
-  health_check_grace_period_seconds = 300
+  health_check_grace_period_seconds = var.health_check_grace_period
 
   enable_execute_command = true
 
