@@ -6,7 +6,7 @@ echo "================================================"
 echo "Loading extension secrets..."
 echo "================================================"
 
-EXTENSIONS_LIST_FILE="${APP_DIR}/files/env/extensions.list.txt"
+EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"
 
 # Export common variables that extensions might reference in their secrets files
 export SECRET_NAME="${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-secrets"

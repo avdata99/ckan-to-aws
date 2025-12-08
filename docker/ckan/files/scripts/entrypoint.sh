@@ -44,7 +44,7 @@ ckan db upgrade
 # Rebuild search index
 ckan search-index rebuild
 
-EXTENSIONS_LIST_FILE="${APP_DIR}/files/env/extensions.list.txt"
+EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"
 # At this point, this file exists.
 # iterate all folders like EXTENSION_DIR="${APP_DIR}/extensions/$extension"
 # and if the file extension.entrypoint.sh exists, run it
