@@ -59,8 +59,7 @@ aws ecs update-service \
   --service "${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-ckan" \
   --force-new-deployment \
   --region "$AWS_REGION" \
-  $AWS_PROFILE_OPTION \
-  --no-cli-pager
+  $AWS_PROFILE_OPTION
 
 echo ""
 echo "========================================"

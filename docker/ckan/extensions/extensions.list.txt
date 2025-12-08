@@ -1,4 +1,5 @@
 pdfview
+core-activity
 s3filestore
 # datapusher-plus
 # Error in tracking

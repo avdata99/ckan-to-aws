@@ -166,17 +166,6 @@ ECS_HEALTH_CHECK_GRACE_PERIOD=600
 2. Check the secrets in AWS Secrets Manager contain correct values
 3. Ensure the RDS security group allows traffic from the CKAN security group
 
-## Costs
-
-Estimated monthly costs (us-east-2, minimal configuration):
-- **RDS db.t3.micro**: ~$15/month
-- **Fargate (2 vCPU, 4GB)**: ~$60/month
-- **ALB**: ~$20/month
-- **NAT Gateway**: ~$35/month (if creating new VPC)
-- **ECR/S3/Secrets**: <$5/month
-
-**Total**: ~$130-150/month for a minimal dev environment
-
 ## Cleanup
 
 To destroy all resources:
