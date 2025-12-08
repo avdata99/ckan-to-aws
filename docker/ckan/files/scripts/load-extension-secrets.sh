@@ -8,8 +8,36 @@ echo "================================================"
 
 EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"
 
+# Source the environment file if variables are not set
+# This handles cases where env vars weren't passed to the container
+if [ -z "$UNIQUE_PROJECT_ID" ] || [ -z "$ENVIRONMENT" ]; then
+    if [ -f "${APP_DIR}/.env" ]; then
+        echo "Sourcing ${APP_DIR}/.env for missing variables..."
+        source "${APP_DIR}/.env"
+    fi
+fi
+
+# Debug: Show relevant environment variables
+echo "Debug: APP_DIR=$APP_DIR"
+echo "Debug: UNIQUE_PROJECT_ID=$UNIQUE_PROJECT_ID"
+echo "Debug: ENVIRONMENT=$ENVIRONMENT"
+echo "Debug: AWS_REGION=$AWS_REGION"
+
+# Validate required variables before constructing SECRET_NAME
+if [ -z "$UNIQUE_PROJECT_ID" ]; then
+    echo "ERROR: UNIQUE_PROJECT_ID is not set"
+    echo "Please ensure UNIQUE_PROJECT_ID is defined in your ECS task definition or .env file"
+    exit 1
+fi
+if [ -z "$ENVIRONMENT" ]; then
+    echo "ERROR: ENVIRONMENT is not set"
+    echo "Please ensure ENVIRONMENT is defined in your ECS task definition or .env file"
+    exit 1
+fi
+
 # Export common variables that extensions might reference in their secrets files
 export SECRET_NAME="${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-secrets"
+echo "Using SECRET_NAME: $SECRET_NAME"
 
 if [ ! -f "$EXTENSIONS_LIST_FILE" ]; then
     echo "No extensions list found, skipping extension secrets"
@@ -61,36 +89,68 @@ while IFS= read -r extension || [ -n "$extension" ]; do
         fi
         
         # Expand environment variables in SECRET_REF (e.g., ${SECRET_NAME} -> actual value)
-        SECRET_REF=$(eval echo "$SECRET_REF")
+        SECRET_REF_EXPANDED=$(eval echo "$SECRET_REF")
         
         # Check if it contains a JSON key reference
-        if [[ "$SECRET_REF" == *":"* ]]; then
-            SECRET_ID=$(echo "$SECRET_REF" | cut -d':' -f1)
-            JSON_KEY=$(echo "$SECRET_REF" | cut -d':' -f2-)
+        if [[ "$SECRET_REF_EXPANDED" == *":"* ]]; then
+            SECRET_ID=$(echo "$SECRET_REF_EXPANDED" | cut -d':' -f1)
+            JSON_KEY=$(echo "$SECRET_REF_EXPANDED" | cut -d':' -f2-)
             
-            echo "  Fetching $ENV_VAR from $SECRET_ID (key: $JSON_KEY)"
+            echo "  Fetching $ENV_VAR from '$SECRET_ID' (key: $JSON_KEY)"
             
             # Fetch the secret and extract the JSON key
-            SECRET_VALUE=$(aws secretsmanager get-secret-value \
+            AWS_ERROR=$(mktemp)
+            SECRET_JSON=$(aws secretsmanager get-secret-value \
                 --secret-id "$SECRET_ID" \
                 --region "${AWS_REGION:-us-east-2}" \
                 --query 'SecretString' \
-                --output text 2>/dev/null | jq -r ".$JSON_KEY // empty")
+                --output text 2>"$AWS_ERROR")
+            AWS_EXIT_CODE=$?
+            
+            if [ $AWS_EXIT_CODE -ne 0 ]; then
+                echo "  ERROR: AWS CLI failed for $ENV_VAR (exit code: $AWS_EXIT_CODE)"
+                echo "  Secret ID: '$SECRET_ID'"
+                echo "  Original reference: '$SECRET_REF'"
+                echo "  AWS Error: $(cat "$AWS_ERROR")"
+                rm -f "$AWS_ERROR"
+                continue
+            fi
+            rm -f "$AWS_ERROR"
+            
+            SECRET_VALUE=$(echo "$SECRET_JSON" | jq -r ".$JSON_KEY // empty")
+            
+            if [ -z "$SECRET_VALUE" ]; then
+                echo "  ERROR: Key '$JSON_KEY' not found or empty in secret '$SECRET_ID'"
+                echo "  Available keys: $(echo "$SECRET_JSON" | jq -r 'keys | join(", ")')"
+                continue
+            fi
         else
             # No JSON key - treat as plain text secret
-            SECRET_ID="$SECRET_REF"
+            SECRET_ID="$SECRET_REF_EXPANDED"
             
-            echo "  Fetching $ENV_VAR from $SECRET_ID (plain text)"
+            echo "  Fetching $ENV_VAR from '$SECRET_ID' (plain text)"
             
+            AWS_ERROR=$(mktemp)
             SECRET_VALUE=$(aws secretsmanager get-secret-value \
                 --secret-id "$SECRET_ID" \
                 --region "${AWS_REGION:-us-east-2}" \
                 --query 'SecretString' \
-                --output text 2>/dev/null)
+                --output text 2>"$AWS_ERROR")
+            AWS_EXIT_CODE=$?
+            
+            if [ $AWS_EXIT_CODE -ne 0 ]; then
+                echo "  ERROR: AWS CLI failed for $ENV_VAR (exit code: $AWS_EXIT_CODE)"
+                echo "  Secret ID: '$SECRET_ID'"
+                echo "  Original reference: '$SECRET_REF'"
+                echo "  AWS Error: $(cat "$AWS_ERROR")"
+                rm -f "$AWS_ERROR"
+                continue
+            fi
+            rm -f "$AWS_ERROR"
         fi
         
         if [ -z "$SECRET_VALUE" ]; then
-            echo "  Warning: Could not fetch secret for $ENV_VAR"
+            echo "  Warning: Could not fetch secret for $ENV_VAR (empty value returned)"
             continue
         fi
         
