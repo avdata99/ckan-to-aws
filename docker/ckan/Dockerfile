@@ -44,7 +44,7 @@ COPY files/scripts/install-os-deps.sh ${APP_DIR}/files/scripts/install-os-deps.s
 RUN ${APP_DIR}/files/scripts/install-os-deps.sh
 
 # Install curl for health checks
-RUN apt install -y curl vim screen
+RUN apt install -y curl vim screen jq postgresql-client
 
 # Add config files and substitute env vars
 COPY files/etc/supervisord.base ${APP_DIR}/files/etc/supervisord.conf
