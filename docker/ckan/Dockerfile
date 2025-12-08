@@ -59,6 +59,7 @@ COPY files/scripts/install-extensions.sh ${APP_DIR}/files/scripts/install-extens
 COPY files/scripts/setup-ckan-ini-file.sh ${APP_DIR}/files/scripts/setup-ckan-ini-file.sh
 COPY files/scripts/setup-datastore.sh ${APP_DIR}/files/scripts/setup-datastore.sh
 COPY files/scripts/setup-runtime-env.sh ${APP_DIR}/files/scripts/setup-runtime-env.sh
+COPY files/scripts/load-extension-secrets.sh ${APP_DIR}/files/scripts/load-extension-secrets.sh
 COPY extensions ${APP_DIR}/extensions
 
 # Create the ckan user
