@@ -39,22 +39,6 @@ resource "aws_iam_role_policy" "ecs_task_execution_secrets" {
   })
 }
 
-# IAM Role for ECS Tasks (runtime permissions)
-resource "aws_iam_role" "ecs_task" {
-  name = "${var.project_id}-${var.environment}-ecs-task"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ecs-tasks.amazonaws.com"
-      }
-    }]
-  })
-}
-
 # ECS Exec requires SSM permissions on the TASK role (not execution role)
 resource "aws_iam_role_policy" "ecs_exec_policy" {
   name = "${var.project_id}-${var.environment}-ecs-exec"
@@ -211,7 +195,7 @@ resource "aws_ecs_task_definition" "all_in_one" {
         # To force new ECS update
         {
           name  = "ECS_VERSION"
-          value = "14"
+          value = "17"
         },
         # Sysadmin TODO
         {
