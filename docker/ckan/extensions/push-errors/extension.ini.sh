@@ -5,7 +5,8 @@ if [ -z "${SLACK_WEBHOOK_URL}" ]; then
 else
   echo "Configuring push-errors with SLACK_WEBHOOK_URL"
   ckan config-tool ${CKAN_INI} "ckanext.push_errors.url = ${SLACK_WEBHOOK_URL}"
+  ckan config-tool ${CKAN_INI} "ckanext.push_errors.title = CKAN AWS logs *{site_url}* CKAN {ckan_version} {now}"
   ckan config-tool ${CKAN_INI} "ckanext.push_errors.method = POST"
   ckan config-tool ${CKAN_INI} "ckanext.push_errors.headers={}"
-  ckan config-tool ${CKAN_INI} "ckanext.push_errors.data={\"text\": \"{message}\", \"username\": \"CKAN AWS LOGS\", \"icon_url\": \"https://github.com/unckan/ckanext-push-errors/raw/main/icons/server-error.png\"}"
+  ckan config-tool ${CKAN_INI} "ckanext.push_errors.data={\"text\": \"{message}\", \"username\": \"CKAN AWS logs\", \"icon_url\": \"https://github.com/unckan/ckanext-push-errors/raw/main/icons/server-error.png\"}"
 fi
