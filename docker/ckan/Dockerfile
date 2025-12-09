@@ -32,8 +32,6 @@ COPY files/scripts/build-env-vars.sh ${APP_DIR}/files/scripts/build-env-vars.sh
 RUN echo "Building for ENV_NAME=${ENV_NAME} TZ=${TZ}"
 COPY files/env/base.env ${APP_DIR}/files/env/base.env
 COPY files/env/${ENV_NAME}.env ${APP_DIR}/files/env/${ENV_NAME}.env
-# Also, include main .env file for default values
-COPY files/env/AWS.env ${APP_DIR}/files/env/AWS.env
 RUN ${APP_DIR}/files/scripts/build-env-vars.sh
 
 # Install OS dependencies
@@ -44,7 +42,7 @@ COPY files/scripts/install-os-deps.sh ${APP_DIR}/files/scripts/install-os-deps.s
 RUN ${APP_DIR}/files/scripts/install-os-deps.sh
 
 # Install curl for health checks
-RUN apt install -y curl vim screen
+RUN apt install -y curl vim screen jq postgresql-client
 
 # Add config files and substitute env vars
 COPY files/etc/supervisord.base ${APP_DIR}/files/etc/supervisord.conf

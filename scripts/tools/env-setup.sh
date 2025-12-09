@@ -54,10 +54,15 @@ fi
 
 # Get AWS Account ID
 export AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID:-$(aws sts get-caller-identity $AWS_PROFILE_OPTION --query Account --output text)}
+if [ -z "$AWS_ACCOUNT_ID" ]; then
+    echo "Error: Unable to determine AWS Account ID. Please check your AWS credentials and configuration."
+    exit 1
+fi
+
 echo "AWS Account ID: $AWS_ACCOUNT_ID"
 
 # Set ECR registry
-export ECR_REGISTRY=${ECR_REGISTRY:-$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com}
+export ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com"
 echo "ECR Registry: $ECR_REGISTRY"
 
 echo "Environment setup complete for your project $UNIQUE_PROJECT_ID"

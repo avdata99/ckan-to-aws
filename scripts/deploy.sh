@@ -9,6 +9,34 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Load environment variables from the main setup script
 source "$SCRIPT_DIR/tools/env-setup.sh"
 
+# -----------------------------------------------------------------------------
+# Pre-flight check: Verify secrets exist in AWS Secrets Manager
+# -----------------------------------------------------------------------------
+echo "========================================"
+echo "Pre-flight Check: Verifying Secrets"
+echo "========================================"
+
+SECRET_NAME="${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-secrets"
+echo "Checking for secret: $SECRET_NAME"
+
+if ! aws secretsmanager describe-secret --secret-id "$SECRET_NAME" --region $AWS_REGION $AWS_PROFILE_OPTION >/dev/null 2>&1; then
+    echo ""
+    echo "========================================"
+    echo "ERROR: Required secrets not found!"
+    echo "========================================"
+    echo ""
+    echo "The secret '$SECRET_NAME' does not exist in AWS Secrets Manager."
+    echo ""
+    echo "Before running deployment, you must create the secrets:"
+    echo "  ./scripts/tools/push-secrets.sh"
+    echo ""
+    echo "For more information, see the README.md section on 'Secrets Management'."
+    exit 1
+fi
+
+echo "✓ Secrets found in AWS Secrets Manager"
+echo ""
+
 # 1. Setup Terraform backend (S3 + DynamoDB)
 echo "========================================"
 echo "Terraform Backend Setup"
@@ -234,6 +262,63 @@ echo "========================================"
 echo "RDS Deployment Complete!"
 echo "========================================"
 
+# -----------------------------------------------------------------------------
+# Update secrets with RDS endpoint
+# -----------------------------------------------------------------------------
+echo "========================================"
+echo "Updating Secrets with RDS Endpoint"
+echo "========================================"
+
+echo "Fetching RDS endpoint..."
+RDS_ENDPOINT=$(aws rds describe-db-instances \
+    --db-instance-identifier ${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-db \
+    --region $AWS_REGION \
+    $AWS_PROFILE_OPTION \
+    --query 'DBInstances[0].Endpoint.Address' \
+    --output text 2>/dev/null || echo "")
+
+if [ -z "$RDS_ENDPOINT" ] || [ "$RDS_ENDPOINT" = "None" ]; then
+    echo "Warning: Could not fetch RDS endpoint."
+    echo "You may need to manually update the secret with the RDS endpoint:"
+    echo "  ./scripts/tools/push-secrets.sh --update-rds-endpoint"
+else
+    DB_HOST=$(echo "$RDS_ENDPOINT" | cut -d':' -f1)
+    echo "Found RDS endpoint: $DB_HOST"
+    
+    # Check if db_host in secret is empty or placeholder
+    CURRENT_DB_HOST=$(aws secretsmanager get-secret-value \
+        --secret-id "$SECRET_NAME" \
+        --region $AWS_REGION \
+        $AWS_PROFILE_OPTION \
+        --query 'SecretString' \
+        --output text 2>/dev/null | jq -r '.db_host // empty')
+    
+    if [ -z "$CURRENT_DB_HOST" ] || [ "$CURRENT_DB_HOST" = "null" ]; then
+        echo "Updating secret with RDS endpoint..."
+        # Get existing secret and update only db_host
+        EXISTING_SECRET=$(aws secretsmanager get-secret-value \
+            --secret-id "$SECRET_NAME" \
+            --region $AWS_REGION \
+            $AWS_PROFILE_OPTION \
+            --query 'SecretString' \
+            --output text)
+        
+        UPDATED_SECRET=$(echo "$EXISTING_SECRET" | jq --arg host "$DB_HOST" '.db_host = $host')
+        
+        aws secretsmanager put-secret-value \
+            --secret-id "$SECRET_NAME" \
+            --secret-string "$UPDATED_SECRET" \
+            --region $AWS_REGION \
+            $AWS_PROFILE_OPTION
+        
+        echo "✓ Secret updated with RDS endpoint"
+    else
+        echo "✓ Secret already has RDS endpoint: $CURRENT_DB_HOST"
+    fi
+fi
+
+echo "========================================"
+
 # 6. Deploy ECR repositories
 echo "========================================"
 echo "Deploying ECR Repositories"
@@ -379,135 +464,7 @@ echo "  $REDIS_REPO:$IMAGE_TAG"
 echo "========================================"
 
 
-# 8. Push secrets to AWS Secrets Manager
-echo "========================================"
-echo "Push Secrets to AWS Secrets Manager"
-echo "========================================"
-
-SECRET_NAME="${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-secrets"
-echo "Creating/Updating secret: $SECRET_NAME"
-echo ""
-
-# Get RDS endpoint from Terraform if available
-echo "Checking if RDS exists to get endpoint..."
-RDS_ENDPOINT=$(aws rds describe-db-instances \
-  --db-instance-identifier ${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-db \
-  --region $AWS_REGION \
-  $AWS_PROFILE_OPTION \
-  --query 'DBInstances[0].Endpoint.Address' \
-  --output text 2>/dev/null || echo "")
-
-if [ -n "$RDS_ENDPOINT" ]; then
-    DB_HOST=$(echo "$RDS_ENDPOINT" | cut -d':' -f1)
-    echo "Found RDS endpoint: $DB_HOST"
-else
-    DB_HOST="will-be-set-by-terraform"
-    echo "RDS not yet deployed, using placeholder"
-fi
-
-# Try to get existing secret values if the secret exists
-EXISTING_SECRET_JSON=""
-if aws secretsmanager describe-secret --secret-id "$SECRET_NAME" --region $AWS_REGION $AWS_PROFILE_OPTION >/dev/null 2>&1; then
-  EXISTING_SECRET_JSON=$(aws secretsmanager get-secret-value \
-    --secret-id "$SECRET_NAME" \
-    --region $AWS_REGION \
-    $AWS_PROFILE_OPTION \
-    --query 'SecretString' \
-    --output text 2>/dev/null || echo "")
-fi
-
-# Helper to extract a value from the existing secret JSON or generate a new one
-get_or_generate_secret() {
-  local key="$1"
-  local gen_cmd="$2"
-  if [ -n "$EXISTING_SECRET_JSON" ]; then
-    local val=$(echo "$EXISTING_SECRET_JSON" | jq -r --arg k "$key" '.[$k]')
-    if [ "$val" != "null" ] && [ -n "$val" ]; then
-      echo "$val"
-      return
-    fi
-  fi
-  eval "$gen_cmd"
-}
-
-DATASTORE_READ_PASSWORD=$(get_or_generate_secret "datastore_read_password" "openssl rand -hex 16")
-DATASTORE_WRITE_PASSWORD=$(get_or_generate_secret "datastore_write_password" "openssl rand -hex 16")
-SECRET_KEY=$(get_or_generate_secret "secret_key" "openssl rand -hex 32")
-BEAKER_SESSION_SECRET=$(get_or_generate_secret "beaker_session_secret" "openssl rand -hex 32")
-BEAKER_SESSION_VALIDATE_KEY=$(get_or_generate_secret "beaker_session_validate_key" "openssl rand -hex 32")
-
-# Build the secret JSON with ALL application secrets
-SECRET_JSON=$(cat <<EOF
-{
-  "db_username": "${DB_USERNAME}",
-  "db_password": "${DB_PASSWORD}",
-  "db_host": "${DB_HOST}",
-  "db_port": "5432",
-  "db_name": "${DB_NAME}",
-  "datastore_db": "datastore",
-  "datastore_read_user": "datastore_read",
-  "datastore_read_password": "${DATASTORE_READ_PASSWORD}",
-  "datastore_write_user": "datastore_write",
-  "datastore_write_password": "${DATASTORE_WRITE_PASSWORD}",
-  "secret_key": "${SECRET_KEY}",
-  "beaker_session_secret": "${BEAKER_SESSION_SECRET}",
-  "beaker_session_validate_key": "${BEAKER_SESSION_VALIDATE_KEY}"
-}
-EOF
-)
-
-# Check if secret exists
-if aws secretsmanager describe-secret --secret-id "$SECRET_NAME" --region $AWS_REGION $AWS_PROFILE_OPTION >/dev/null 2>&1; then
-  echo "Secret already exists. Updating..."
-  # Only update if we have real values (don't overwrite with placeholders)
-  if [ "$DB_HOST" != "will-be-set-by-terraform" ]; then
-      aws secretsmanager put-secret-value \
-        --secret-id "$SECRET_NAME" \
-        --secret-string "$SECRET_JSON" \
-        --region $AWS_REGION \
-        $AWS_PROFILE_OPTION
-      echo "Secret updated with current values"
-  else
-      echo "⚠ Skipping update (RDS not deployed yet, keeping existing secret)"
-  fi
-else
-  echo "Secret does not exist. Creating..."
-  aws secretsmanager create-secret \
-    --name "$SECRET_NAME" \
-    --description "All secrets for CKAN ${ENVIRONMENT} environment" \
-    --secret-string "$SECRET_JSON" \
-    --region $AWS_REGION \
-    $AWS_PROFILE_OPTION
-  echo "Secret created"
-fi
-
-echo ""
-echo "========================================"
-echo "Secrets Successfully Stored in AWS!"
-echo "========================================"
-echo ""
-echo "Secret ARN:"
-SECRET_ARN=$(aws secretsmanager describe-secret \
-  --secret-id "$SECRET_NAME" \
-  --region $AWS_REGION \
-  $AWS_PROFILE_OPTION \
-  --query 'ARN' \
-  --output text)
-echo "$SECRET_ARN"
-echo ""
-echo "This secret contains:"
-echo "  - Main database credentials (username, password)"
-echo "  - Database connection info (host, port, db name)"
-echo "  - Datastore database credentials (read and write users)"
-echo "  - CKAN secrets (SECRET_KEY, BEAKER_SESSION_SECRET, etc.)"
-echo ""
-echo "Important Security Notes:"
-echo "  - Secrets are encrypted at rest with AWS KMS"
-echo "  - Access is controlled via IAM policies"
-echo "========================================"
-
-
-# 9. Deploy ECS Cluster
+# 8. Deploy ECS Cluster
 echo "========================================"
 echo "Deploying ECS Cluster"
 echo "========================================"
@@ -524,7 +481,7 @@ echo "========================================"
 echo "ECS Cluster Deployment Complete!"
 echo "========================================"
 
-# 10. Deploy Application Load Balancer (before ECS tasks, as tasks need ALB DNS)
+# 9. Deploy Application Load Balancer
 echo "========================================"
 echo "Deploying Application Load Balancer (ALB)"
 echo "========================================"
@@ -541,7 +498,7 @@ echo "========================================"
 echo "ALB Deployment Complete!"
 echo "========================================"
 
-# 11. Deploy ECS Task Definitions (after ALB, needs alb_dns_name)
+# 10. Deploy ECS Task Definitions
 echo "========================================"
 echo "Deploying ECS Task Definitions"
 echo "========================================"
@@ -562,7 +519,7 @@ echo "Task Definition created:"
 echo "  - All-in-One Task (CKAN + Solr + Redis using localhost)"
 echo "========================================"
 
-# 12. Deploy All-in-One ECS Service (CKAN+Solr+Redis)
+# 11. Deploy All-in-One ECS Service
 echo "========================================"
 echo "Deploying All-in-One Service (CKAN + Solr + Redis)"
 echo "========================================"

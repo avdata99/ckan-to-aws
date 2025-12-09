@@ -2,7 +2,7 @@
 
 echo "Executing entrypoint.sh"
 
-# Setup runtime environment (AWS Secrets Manager or .env file)
+# Setup runtime environment (loads .env, then overrides with AWS Secrets Manager)
 source ${APP_DIR}/files/scripts/setup-runtime-env.sh
 
 # Re-run ckan.ini setup with runtime configuration (real database URLs, secrets from AWS)
@@ -41,7 +41,7 @@ ckan db upgrade
 # Rebuild search index
 ckan search-index rebuild
 
-EXTENSIONS_LIST_FILE="${APP_DIR}/files/env/extensions.list.txt"
+EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"
 # At this point, this file exists.
 # iterate all folders like EXTENSION_DIR="${APP_DIR}/extensions/$extension"
 # and if the file extension.entrypoint.sh exists, run it
