@@ -32,8 +32,6 @@ COPY files/scripts/build-env-vars.sh ${APP_DIR}/files/scripts/build-env-vars.sh
 RUN echo "Building for ENV_NAME=${ENV_NAME} TZ=${TZ}"
 COPY files/env/base.env ${APP_DIR}/files/env/base.env
 COPY files/env/${ENV_NAME}.env ${APP_DIR}/files/env/${ENV_NAME}.env
-# Also, include main .env file for default values
-COPY files/env/AWS.env ${APP_DIR}/files/env/AWS.env
 RUN ${APP_DIR}/files/scripts/build-env-vars.sh
 
 # Install OS dependencies
@@ -59,7 +57,6 @@ COPY files/scripts/install-extensions.sh ${APP_DIR}/files/scripts/install-extens
 COPY files/scripts/setup-ckan-ini-file.sh ${APP_DIR}/files/scripts/setup-ckan-ini-file.sh
 COPY files/scripts/setup-datastore.sh ${APP_DIR}/files/scripts/setup-datastore.sh
 COPY files/scripts/setup-runtime-env.sh ${APP_DIR}/files/scripts/setup-runtime-env.sh
-COPY files/scripts/load-extension-secrets.sh ${APP_DIR}/files/scripts/load-extension-secrets.sh
 COPY extensions ${APP_DIR}/extensions
 
 # Create the ckan user

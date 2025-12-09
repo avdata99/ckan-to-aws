@@ -32,6 +32,14 @@ ckan config-tool ${CKAN_INI} "solr_url = ${SOLR_URL}"
 # Example: 'rediss://default:<pass>@<name>.redis.cache.windows.net:6380'
 ckan config-tool ${CKAN_INI} "ckan.redis.url = ${CKAN_REDIS_URL}"
 
+# Datastore URLs
+if [ -n "$DATASTORE_WRITE_URL" ]; then
+    ckan config-tool ${CKAN_INI} "ckan.datastore.write_url = ${DATASTORE_WRITE_URL}"
+fi
+if [ -n "$DATASTORE_READ_URL" ]; then
+    ckan config-tool ${CKAN_INI} "ckan.datastore.read_url = ${DATASTORE_READ_URL}"
+fi
+
 # Build plugins list from extensions
 PLUGINS_LIST=""
 EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"

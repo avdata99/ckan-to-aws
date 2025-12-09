@@ -7,6 +7,9 @@ set -e
 echo "Starting Datastore Setup"
 cd $APP_DIR
 
+# Activate venv for ckan CLI
+source ${APP_DIR}/venv/bin/activate
+
 export PGPASSWORD=$DB_PASSWORD
 # Create the CKAN DB, there is no psql_user
 echo "Creating CKAN database if not exists"
