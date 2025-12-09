@@ -1,3 +1,4 @@
+push-errors
 pdfview
 core-activity
 s3filestore
@@ -6,5 +7,4 @@ s3filestore
 # core-tracking
 # api-tracking
 # announcements
-# push-errors
 # core-datastore
