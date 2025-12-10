@@ -290,7 +290,9 @@ or for other containers:
 
 ### CKAN Extensions
 
-Extensions are managed via the `extensions.list.txt` file. Each extension can have its own entrypoint script (`extension.entrypoint.sh`) that runs during container startup.
+Extensions are managed via the `extensions.list.txt` file.  
+You'll need to create this file, you can use the sample provided at `docker/ckan/extensions/extensions.list.sample.txt`
+Each extension can have its own entrypoint script (`extension.entrypoint.sh`) that runs during container startup.
 
 To add a new extension:
 

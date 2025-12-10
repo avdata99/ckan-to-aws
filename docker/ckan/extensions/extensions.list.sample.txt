@@ -2,9 +2,6 @@ push-errors
 pdfview
 core-activity
 s3filestore
-# datapusher-plus
-# Error in tracking
 core-tracking
 api-tracking
 announcements
-# core-datastore
