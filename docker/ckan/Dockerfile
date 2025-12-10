@@ -26,19 +26,17 @@ ENV LC_ALL=en_US.UTF-8
 # Copy files one by one to ensure Dockerfile is caching layers
 # and the change in one file does not invalidate the cache of the others
 
-# Prepare the environment vars
-COPY files/scripts/build-env-vars.sh ${APP_DIR}/files/scripts/build-env-vars.sh
+# Copy all scripts at once
+COPY files/scripts ${APP_DIR}/files/scripts
 
+# Prepare the environment vars
 RUN echo "Building for ENV_NAME=${ENV_NAME} TZ=${TZ}"
 COPY files/env/base.env ${APP_DIR}/files/env/base.env
 COPY files/env/${ENV_NAME}.env ${APP_DIR}/files/env/${ENV_NAME}.env
 RUN ${APP_DIR}/files/scripts/build-env-vars.sh
 
 # Install OS dependencies
-COPY files/scripts/install-python.sh ${APP_DIR}/files/scripts/install-python.sh
 RUN ${APP_DIR}/files/scripts/install-python.sh
-
-COPY files/scripts/install-os-deps.sh ${APP_DIR}/files/scripts/install-os-deps.sh
 RUN ${APP_DIR}/files/scripts/install-os-deps.sh
 
 # Install curl for health checks
@@ -47,16 +45,10 @@ RUN apt install -y curl vim screen jq postgresql-client
 # Add config files and substitute env vars
 COPY files/etc/supervisord.base ${APP_DIR}/files/etc/supervisord.conf
 COPY files/etc/ckan*.conf ${APP_DIR}/files/etc/
-COPY files/scripts/prepare-supervisor.sh ${APP_DIR}/files/scripts/prepare-supervisor.sh
 RUN ${APP_DIR}/files/scripts/prepare-supervisor.sh
 
 COPY files/patches ${APP_DIR}/files/patches
 COPY files/ckan.ini ${CKAN_INI}
-COPY files/scripts/install-ckan.sh ${APP_DIR}/files/scripts/install-ckan.sh
-COPY files/scripts/install-extensions.sh ${APP_DIR}/files/scripts/install-extensions.sh
-COPY files/scripts/setup-ckan-ini-file.sh ${APP_DIR}/files/scripts/setup-ckan-ini-file.sh
-COPY files/scripts/setup-datastore.sh ${APP_DIR}/files/scripts/setup-datastore.sh
-COPY files/scripts/setup-runtime-env.sh ${APP_DIR}/files/scripts/setup-runtime-env.sh
 COPY extensions ${APP_DIR}/extensions
 
 # Create the ckan user

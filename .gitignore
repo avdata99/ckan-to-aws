@@ -21,6 +21,7 @@ override.tf.json
 tfplan
 docker/ckan/extensions/extensions.list.txt
 docker/ckan/files/scripts/private
+docker/ckan/extensions/private_*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

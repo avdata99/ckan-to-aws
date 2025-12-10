@@ -35,11 +35,17 @@ echo "Datastore setup complete"
 
 source ${APP_DIR}/venv/bin/activate
 
-echo "CKAN db upgrade"
-ckan db upgrade
-
-# Rebuild search index
-ckan search-index rebuild
+# Here we can run private (ignored in this repo) scripts
+# If the file ${APP_DIR}/files/scripts/private/private-entrypoint.sh exists,
+# run it
+PRIVATE_ENTRYPOINT_SCRIPT="${APP_DIR}/files/scripts/private/private-entrypoint.sh"
+if [ -f "$PRIVATE_ENTRYPOINT_SCRIPT" ]; then
+    echo "Running private entrypoint script"
+    chmod +x "$PRIVATE_ENTRYPOINT_SCRIPT"
+    bash "$PRIVATE_ENTRYPOINT_SCRIPT"
+else
+    echo "No private entrypoint script found"
+fi
 
 EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"
 # At this point, this file exists.
@@ -66,6 +72,14 @@ if [ -f "$EXTENSIONS_LIST_FILE" ]; then
         
     done < "$EXTENSIONS_LIST_FILE"
 fi
+
+# Upgrade must be after all to avoid issues with extensions needing DB migrations
+# Private extensoin will be probably installed at extension.entrypoint.sh (just before this)
+echo "CKAN db upgrade"
+ckan db upgrade
+
+# Rebuild search index
+ckan search-index rebuild
 
 ckan config-tool ckan.ini "ckanext.ckan_aws.version=${CKAN_APP_VERSION}"
 
