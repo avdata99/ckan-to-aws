@@ -292,7 +292,10 @@ or for other containers:
 
 Extensions are managed via the `extensions.list.txt` file.  
 You'll need to create this file, you can use the sample provided at `docker/ckan/extensions/extensions.list.sample.txt`
-Each extension can have its own entrypoint script (`extension.entrypoint.sh`) that runs during container startup.
+Each extension can have its own entrypoint script (`extension.entrypoint.sh`) that runs during container startup. Also, extensions can define required secrets in `extension.secrets.txt` and more.  
+
+If you need to include private extension, you can save them under `docker/ckan/extensions/private_<extension_name>/` and add the name to `extensions.list.txt` as `private_<extension_name>`.  
+This way, private extensions are ignored by git and won't be pushed to public repositories.  
 
 To add a new extension:
 
