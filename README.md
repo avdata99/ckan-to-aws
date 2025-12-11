@@ -297,12 +297,17 @@ Each extension can have its own entrypoint script (`extension.entrypoint.sh`) th
 If you need to include private extension, you can save them under `docker/ckan/extensions/private_<extension_name>/` and add the name to `extensions.list.txt` as `private_<extension_name>`.  
 This way, private extensions are ignored by git and won't be pushed to public repositories.  
 
+If you need to install private extensions from private git repositories, you can use the sample script at `docker/ckan/files/scripts/private/sample-private-100-for-private-repo-ext.sh` as a template.  
+
 To add a new extension:
 
 1. Add the extension name to `docker/ckan/files/env/extensions.list.txt`
 2. Create the extension directory under `docker/ckan/extensions/`
 3. Optionally add `extension.entrypoint.sh` for custom initialization
-4. Optionally add `extension.secrets.txt` for AWS Secrets Manager integration
+4. Optionally add `extension.secrets.txt` for AWS Secrets Manager integration.
+5. Optionally add `extension.install.sh` for custom installation steps during Docker build.
+6. Optionally add `extension.ini.sh` to customize CKAN configuration settings for the extension.
+7. Optionally add `extension.plugins.txt` to list CKAN plugins to enable (they will be appended to the `ckan.plugins` setting).
 
 ### Extension Secrets
 
@@ -328,23 +333,18 @@ API_KEY=myproject-dev-api-key
 | `${ENVIRONMENT}` | Environment name | `dev` |
 | `${AWS_REGION}` | AWS region | `us-east-2` |
 
-**Example**: For the s3filestore extension, create:
+**Example**:
+
+For the s3filestore extension, create:
+
 ```
 docker/ckan/extensions/s3filestore/
 ├── extension.install.sh      # Runs at build time
 ├── extension.entrypoint.sh   # Runs at container startup
+├── extension.ini.sh         # Custom CKAN config settings
+├── extension.plugins.txt     # CKAN plugins to enable
 └── extension.secrets.txt     # Secrets to load from AWS
 ```
-
-**Creating the secret in AWS**:
-```bash
-aws secretsmanager create-secret \
-    --name "myproject-dev-s3-secrets" \
-    --secret-string '{"access_key_id":"AKIA...","secret_access_key":"...","bucket_name":"my-bucket","region":"us-east-2"}' \
-    --region us-east-2
-```
-
-**Note**: Extension secrets are only loaded when running in AWS ECS. For local development, set these values in your `.env` file.
 
 ### S3 Filestore
 
