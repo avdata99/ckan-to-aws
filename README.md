@@ -297,7 +297,7 @@ Each extension can have its own entrypoint script (`extension.entrypoint.sh`) th
 If you need to include private extension, you can save them under `docker/ckan/extensions/private_<extension_name>/` and add the name to `extensions.list.txt` as `private_<extension_name>`.  
 This way, private extensions are ignored by git and won't be pushed to public repositories.  
 
-If you need to install private extensions from private git repositories, you can use the sample script at `docker/ckan/files/scripts/private/sample-private-100-for-private-repo-ext.sh` as a template.  
+If you need to install private extensions from private git repositories, you can use the sample script at `docker/ckan/files/scripts/private/sample-private-entrypoint-for-private-repo-ext.sh` as a template.  
 
 To add a new extension:
 
