@@ -3,5 +3,7 @@ DATAPUSHER_TOKEN=$(ckan user token add default xloader_token | tail -n 1 | tr -d
 echo "Setting xloader configuration in CKAN ini file"
 ckan config-tool ${CKAN_INI} "ckanext.xloader.api_token = ${DATAPUSHER_TOKEN}"
 
-echo "Setting for DB jobs"
+echo "Setting for xloader"
 ckan config-tool ${CKAN_INI} "ckanext.xloader.jobs_db.uri = ${SQLALCHEMY_URL}"
+
+ckan config-tool ${CKAN_INI} "ckanext.xloader.max_content_length = 10000000"
