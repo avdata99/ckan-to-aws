@@ -5,5 +5,9 @@ s3filestore
 core-tracking
 api-tracking
 announcements
+core-datastore
 core-datapusher
 xloader
+core-image_view
+core-text_view
+core-datatables_view
