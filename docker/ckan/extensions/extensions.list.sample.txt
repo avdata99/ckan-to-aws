@@ -11,3 +11,4 @@ xloader
 core-image_view
 core-text_view
 core-datatables_view
+dbquery
