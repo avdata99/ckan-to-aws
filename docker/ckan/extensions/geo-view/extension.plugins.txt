@@ -1,1 +1,5 @@
+resource_proxy
 geo_view
+geojson_view
+wmts_view
+shp_view
