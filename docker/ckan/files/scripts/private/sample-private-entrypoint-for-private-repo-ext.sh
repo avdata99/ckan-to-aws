@@ -3,8 +3,12 @@
 # This is a sample to install a private extension using a deploy key from AWS Secrets Manager
 
 # CKAN_EXTENSION_REPO_DEPLOY_KEY is expected to be set in the environment coming from AWS Secrets Manager
+# Something like this should work
+# ssh-keygen -t ed25519 -C "deploy-key-$(date +%Y%m%d)" -f ~/.ssh/ckan_extension_repo_deploy_key -N ""
 # This key must be saved after being base64 decoded if it was stored that way.
 # with cat ~/.ssh/ckan_extension_repo_deploy_key | base64 -w 0
+# The use this in the extension.secrets.txt file
+# CKAN_EXTENSION_REPO_DEPLOY_KEY=ckan_extension_repo_deploy_key
 # Write key to temp file with correct permissions
 TEMP_KEY=$(mktemp)
 # If key is base64 encoded, decode it; otherwise handle literal \n
