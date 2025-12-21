@@ -5,3 +5,19 @@ git clone --depth 1 --branch 0.1.6 https://github.com/unckan/ckanext-push-errors
 pip install -q "$TEMP_DIR"
 pip install -r "$TEMP_DIR/requirements.txt"
 rm -rf "$TEMP_DIR"
+
+# You'll need to enable CORS for this bucket if you plan to preview data
+# (like geojson_view) directly from S3 in the browser.
+# [
+#     {
+#         "AllowedHeaders": ["*"],
+#         "AllowedMethods": ["GET", "HEAD"],
+#         "AllowedOrigins": ["http://your-portal.org"],
+#         "ExposeHeaders": [
+#             "Content-Range",
+#             "Content-Length",
+#             "ETag"
+#         ],
+#         "MaxAgeSeconds": 3000
+#     }
+# ]
