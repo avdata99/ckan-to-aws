@@ -9,9 +9,7 @@ ckan config-tool ${CKAN_INI} "ckanext.s3filestore.aws_secret_access_key = ${S3FI
 ckan config-tool ${CKAN_INI} "ckanext.s3filestore.acl = private"
 
 # Created a bucket with acl Private
-# The create a service account with this policy attached:
-# Also, user created "ckan-s3-uploader"
-# Policy name ckan-s3-access-for-resources-and-images
+# Create Policy and call it ckan-s3-access-for-resources-and-images
 # {
 #     "Version": "2012-10-17",
 #     "Statement": [
@@ -30,3 +28,11 @@ ckan config-tool ${CKAN_INI} "ckanext.s3filestore.acl = private"
 #         }
 #     ]
 # }
+# The create a IAM user: "ckan-s3-uploader", in the creation
+# process, use "Attach existing policies directly" and select the policy created before.
+# Then edit the user to generate Access Key ID and Secret Access Key.
+# Then ensure adding these values to AWS secrets
+#  - s3filestore_aws_bucket_name
+#  - s3filestore_region_name
+#  - s3filestore_aws_access_key_id
+#  - s3filestore_aws_secret_access_key
