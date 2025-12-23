@@ -208,6 +208,11 @@ This script reads values from your `.env` file and creates a secret in AWS Secre
 | `datastore_read_password` | Password for datastore read user |
 | `datastore_write_user` | Write user for datastore |
 | `datastore_write_password` | Password for datastore write user |
+| `ckan_sysadmin_user` | CKAN sysadmin username |
+| `ckan_sysadmin_password` | CKAN sysadmin password (auto-generated if not provided) |
+| `ckan_sysadmin_email` | CKAN sysadmin email address |
+
+**Important**: Make sure to set `CKAN_SYSADMIN_USER`, `CKAN_SYSADMIN_PASSWORD`, and `CKAN_SYSADMIN_EMAIL` in your `.env` file before running `push-secrets.sh`. These credentials will be used to create the initial CKAN administrator account. Never use default credentials in production!
 
 ### How Secrets Flow to Containers
 

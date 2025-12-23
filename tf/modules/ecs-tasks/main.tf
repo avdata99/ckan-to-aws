@@ -197,19 +197,6 @@ resource "aws_ecs_task_definition" "all_in_one" {
           name  = "ECS_VERSION"
           value = "18"
         },
-        # Sysadmin TODO
-        {
-          name  = "CKAN_SYSADMIN_USER"
-          value = "ckan_admin"
-        },
-        {
-          name  = "CKAN_SYSADMIN_PASS"
-          value = "testpass"
-        },
-        {
-          name  = "CKAN_SYSADMIN_MAIL"
-          value = "ckan_admin@localhost"
-        },
         # Non-sensitive database info
         {
           name  = "DB_PORT"
@@ -270,6 +257,19 @@ resource "aws_ecs_task_definition" "all_in_one" {
         {
           name      = "BEAKER_SESSION_VALIDATE_KEY"
           valueFrom = "${var.app_secret_arn}:beaker_session_validate_key::"
+        },
+        # CKAN sysadmin credentials
+        {
+          name      = "CKAN_SYSADMIN_USER"
+          valueFrom = "${var.app_secret_arn}:ckan_sysadmin_user::"
+        },
+        {
+          name      = "CKAN_SYSADMIN_PASS"
+          valueFrom = "${var.app_secret_arn}:ckan_sysadmin_password::"
+        },
+        {
+          name      = "CKAN_SYSADMIN_MAIL"
+          valueFrom = "${var.app_secret_arn}:ckan_sysadmin_email::"
         }
       ]
       

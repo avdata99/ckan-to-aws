@@ -196,6 +196,7 @@ DATASTORE_WRITE_PASSWORD=$(get_or_generate_secret "datastore_write_password" "op
 SECRET_KEY=$(get_or_generate_secret "secret_key" "openssl rand -hex 32")
 BEAKER_SESSION_SECRET=$(get_or_generate_secret "beaker_session_secret" "openssl rand -hex 32")
 BEAKER_SESSION_VALIDATE_KEY=$(get_or_generate_secret "beaker_session_validate_key" "openssl rand -hex 32")
+CKAN_SYSADMIN_PASSWORD=$(get_or_generate_secret "ckan_sysadmin_password" "openssl rand -hex 16")
 
 # Build the secret JSON with ALL application secrets
 SECRET_JSON=$(cat <<EOF
@@ -212,7 +213,10 @@ SECRET_JSON=$(cat <<EOF
   "datastore_write_password": "${DATASTORE_WRITE_PASSWORD}",
   "secret_key": "${SECRET_KEY}",
   "beaker_session_secret": "${BEAKER_SESSION_SECRET}",
-  "beaker_session_validate_key": "${BEAKER_SESSION_VALIDATE_KEY}"
+  "beaker_session_validate_key": "${BEAKER_SESSION_VALIDATE_KEY}",
+  "ckan_sysadmin_user": "${CKAN_SYSADMIN_USER:-ckan_admin}",
+  "ckan_sysadmin_password": "${CKAN_SYSADMIN_PASSWORD}",
+  "ckan_sysadmin_email": "${CKAN_SYSADMIN_EMAIL:-admin@example.com}"
 }
 EOF
 )
