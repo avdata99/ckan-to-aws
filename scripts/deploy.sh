@@ -533,6 +533,28 @@ terraform apply tfplan
 
 echo ""
 echo "========================================"
+echo "Post-deploy DB Fix: Sync system_info sequence"
+echo "========================================"
+
+CLUSTER_NAME="${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-cluster"
+SERVICE_NAME="${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-ckan"
+
+echo "Waiting for ECS service to become stable..."
+aws ecs wait services-stable \
+  --cluster "$CLUSTER_NAME" \
+  --services "$SERVICE_NAME" \
+  --region "$AWS_REGION" \
+  $AWS_PROFILE_OPTION
+
+echo "Running sequence sync inside CKAN container (ECS Exec)..."
+"$SCRIPT_DIR/tools/ecs-exec.sh" \
+  "/usr/bin/bash -lc \"psql \\\"\\\$CKAN_SQLALCHEMY_URL\\\" -v ON_ERROR_STOP=1 -c \\\"SELECT setval(pg_get_serial_sequence('system_info','id'), COALESCE((SELECT MAX(id) FROM system_info), 1));\\\"\"" \
+  ckan
+
+echo "✓ system_info sequence synced"
+
+echo ""
+echo "========================================"
 echo "All-in-One Service Deployed!"
 echo "========================================"
 echo ""

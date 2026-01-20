@@ -18,14 +18,14 @@ IMAGE_TAG="${IMAGE_TAG:-latest}"
 build_and_push() {
   local name=$1
   local repo="$ECR_REGISTRY/${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-${name}"
-  
+
   echo "========================================"
   echo "Building $name..."
   echo "  Repo: $repo:$IMAGE_TAG"
   echo "========================================"
-  
+
   cd "$DOCKER_DIR/$name"
-  
+
   if [ "$name" = "ckan" ]; then
     mkdir -p files/env
     cp "$ROOT_DIR/.env" files/env/AWS.env
@@ -36,7 +36,7 @@ build_and_push() {
   else
     docker build -t "$repo:$IMAGE_TAG" .
   fi
-  
+
   echo "Pushing $name..."
   docker push "$repo:$IMAGE_TAG"
   echo "$name pushed successfully!"
@@ -60,6 +60,26 @@ aws ecs update-service \
   --force-new-deployment \
   --region "$AWS_REGION" \
   $AWS_PROFILE_OPTION
+
+echo ""
+echo "========================================"
+echo "Waiting for ECS service to become stable..."
+echo "========================================"
+aws ecs wait services-stable \
+  --cluster "${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-cluster" \
+  --services "${UNIQUE_PROJECT_ID}-${ENVIRONMENT}-ckan" \
+  --region "$AWS_REGION" \
+  $AWS_PROFILE_OPTION
+
+echo ""
+echo "========================================"
+echo "Post-deploy DB Fix: Sync system_info sequence"
+echo "========================================"
+"$SCRIPT_DIR/tools/ecs-exec.sh" \
+  "/usr/bin/bash -lc \"psql \\\"\\\$CKAN_SQLALCHEMY_URL\\\" -v ON_ERROR_STOP=1 -c \\\"SELECT setval(pg_get_serial_sequence('system_info','id'), COALESCE((SELECT MAX(id) FROM system_info), 1));\\\"\"" \
+  ckan
+
+echo "✓ system_info sequence synced"
 
 echo ""
 echo "========================================"
