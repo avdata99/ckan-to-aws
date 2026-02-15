@@ -10,6 +10,22 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/tools/env-setup.sh"
 
 # -----------------------------------------------------------------------------
+# App-only mode: skip Terraform, just build and deploy images
+# Use this when infrastructure already exists (e.g., production with limited permissions)
+# -----------------------------------------------------------------------------
+if [ "$1" = "--app-only" ]; then
+    echo ""
+    echo "========================================"
+    echo "App-Only Mode (no Terraform)"
+    echo "========================================"
+    echo "Skipping all infrastructure steps."
+    echo "Delegating to redeploy.sh..."
+    echo ""
+    shift
+    exec "$SCRIPT_DIR/redeploy.sh" all --desired-count 1 "$@"
+fi
+
+# -----------------------------------------------------------------------------
 # Pre-flight check: Verify secrets exist in AWS Secrets Manager
 # -----------------------------------------------------------------------------
 echo "========================================"
