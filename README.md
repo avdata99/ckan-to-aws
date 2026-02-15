@@ -31,6 +31,12 @@ This guide provides step-by-step instructions to deploy the CKAN application on 
    - `AWS_REGION`: Target AWS region
    - `DB_PASSWORD`: A secure password for the database
 
+### Ensure you can build all containers
+
+ - All secrets should be defined in AWS secrets manager.
+ - The extensions file must be ready at `docker/ckan/extensions/extensions.list.txt`
+ - Create your private_extensions if you have any and add them to the extensions list file
+
 ### Step 2: Deploy Everything
 
 Run the full deployment script:
