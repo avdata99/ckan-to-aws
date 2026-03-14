@@ -95,7 +95,7 @@ if [ -f "$EXTENSIONS_LIST_FILE" ]; then
         AFTER_DB_UPGRADE_SCRIPT="$EXTENSION_DIR/extension.after-db-upgrade.sh"
         
         if [ -f "$ENTRYPOINT_SCRIPT" ]; then
-            echo "Running entrypoint script for $extension"
+            echo "Running entrypoint after db upgrade script for $extension"
             chmod +x "$ENTRYPOINT_SCRIPT"
             bash "$ENTRYPOINT_SCRIPT"
         else
