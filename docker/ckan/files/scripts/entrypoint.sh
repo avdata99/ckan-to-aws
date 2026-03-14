@@ -117,7 +117,7 @@ OUT=$(ckan user show $CKAN_SYSADMIN_USER)
 
 if [[ $OUT == *"User: None"* ]]; then
     echo "Creating sysadmin user"
-    ckan user add $CKAN_SYSADMIN_USER password=$CKAN_SYSADMIN_PASS email=$CKAN_SYSADMIN_MAIL
+    ckan user add $CKAN_SYSADMIN_USER password=$CKAN_SYSADMIN_PASSWORD email=$CKAN_SYSADMIN_MAIL
     ckan sysadmin add $CKAN_SYSADMIN_USER
 else
     echo "Sysadmin user already exists"

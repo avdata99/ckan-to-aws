@@ -362,11 +362,11 @@ docker/ckan/extensions/s3filestore/
 To use S3 for file storage instead of local filesystem, configure these in your `.env`:
 
 ```bash
-S3_AWS_ACCESS_KEY_ID=AKIA...
-S3_AWS_SECRET_ACCESS_KEY=your-secret-key
-S3_BUCKET_NAME=your-ckan-files-bucket
-S3_REGION=us-east-2
-S3_ACL=private
+S3FILESTORE_AWS_ACCESS_KEY_ID=AKIA...
+S3FILESTORE_AWS_SECRET_ACCESS_KEY=your-secret-key
+S3FILESTORE_AWS_BUCKET_NAME=your-ckan-files-bucket
+S3FILESTORE_REGION_NAME=us-east-2
+# S3 ACL must be private
 ```
 
 ### Custom CKAN Configuration
