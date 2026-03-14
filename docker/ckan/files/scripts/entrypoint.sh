@@ -5,6 +5,9 @@ echo "Executing entrypoint.sh"
 # Setup runtime environment (loads .env, then overrides with AWS Secrets Manager)
 source ${APP_DIR}/files/scripts/setup-runtime-env.sh
 
+# Install extensions
+bash ${APP_DIR}/files/scripts/install-extensions.sh
+
 # Re-run ckan.ini setup with runtime configuration (real database URLs, secrets from AWS)
 # This updates the ini file that was initially configured at build time with placeholders
 echo "Updating ckan.ini with runtime configuration..."

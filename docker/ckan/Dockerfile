@@ -61,7 +61,6 @@ USER ckan
 
 # Install CKAN
 RUN ${APP_DIR}/files/scripts/install-ckan.sh
-RUN ${APP_DIR}/files/scripts/install-extensions.sh
 RUN cp $APP_DIR/ckan/wsgi.py .
 RUN chmod u+x wsgi.py
 
