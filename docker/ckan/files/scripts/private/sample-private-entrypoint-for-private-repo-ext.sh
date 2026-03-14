@@ -33,3 +33,8 @@ pip install "$EXTENSION_PATH"
 pip install -r "$EXTENSION_PATH/requirements.txt"
 
 rm -rf "$TEMP_DIR"
+
+# ========================================================================
+
+# Some settings relates to different extensions
+ckan config-tool ${CKAN_INI} "ckan.views.default_views = image_view text_view datatables_view pdf_view"
