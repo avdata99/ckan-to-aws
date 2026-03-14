@@ -36,3 +36,19 @@ ckan config-tool ${CKAN_INI} "ckanext.s3filestore.acl = private"
 #  - s3filestore_region_name
 #  - s3filestore_aws_access_key_id
 #  - s3filestore_aws_secret_access_key
+
+# Also, you'll need to enable CORS for this bucket if you plan to preview data
+# (like geojson_view) directly from S3 in the browser.
+# [
+#     {
+#         "AllowedHeaders": ["*"],
+#         "AllowedMethods": ["GET", "HEAD"],
+#         "AllowedOrigins": ["http://your-portal.org"],
+#         "ExposeHeaders": [
+#             "Content-Range",
+#             "Content-Length",
+#             "ETag"
+#         ],
+#         "MaxAgeSeconds": 3000
+#     }
+# ]
