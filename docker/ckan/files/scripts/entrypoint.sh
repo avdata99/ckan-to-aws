@@ -78,6 +78,31 @@ fi
 echo "CKAN db upgrade"
 ckan db upgrade
 
+# Extension can include a extension.after-db-upgrade.sh script that will be executed just after "ckan db upgrade"
+EXTENSIONS_LIST_FILE="${APP_DIR}/extensions/extensions.list.txt"
+if [ -f "$EXTENSIONS_LIST_FILE" ]; then
+    while IFS= read -r extension || [ -n "$extension" ]; do
+        # Skip comments and empty lines
+        [[ "$extension" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${extension// }" ]] && continue
+        
+        extension=$(echo "$extension" | xargs)  # trim whitespace
+        
+        EXTENSION_DIR="${APP_DIR}/extensions/$extension"
+        AFTER_DB_UPGRADE_SCRIPT="$EXTENSION_DIR/extension.after-db-upgrade.sh"
+        
+        if [ -f "$ENTRYPOINT_SCRIPT" ]; then
+            echo "Running entrypoint script for $extension"
+            chmod +x "$ENTRYPOINT_SCRIPT"
+            bash "$ENTRYPOINT_SCRIPT"
+        else
+            echo "No entrypoint script found for $extension"
+        fi
+        
+    done < "$EXTENSIONS_LIST_FILE"
+fi
+
+
 # Rebuild search index
 ckan search-index rebuild
 
