@@ -89,6 +89,14 @@ if [ "$IN_AWS" = true ]; then
         echo "  ✓ $upper_key"
     done
 
+    # -------------------------------------------------------------------------
+    # Step 3.5: Fetch private project overrides from private repo
+    # -------------------------------------------------------------------------
+    # Now that secrets are loaded (including PRIVATE_REPO_DEPLOY_KEY),
+    # fetch project-specific files (extensions.list.txt, private extensions, etc.)
+    # This MUST run before Step 4 which reads extensions.list.txt
+    bash "${APP_DIR}/files/scripts/fetch-private-overrides.sh"
+
     # -----------------------------------------------------------------------------
     # Step 4: Load extension-specific secrets
     # -----------------------------------------------------------------------------
