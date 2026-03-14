@@ -128,7 +128,7 @@ echo "Rebuilding CKAN webassets"
 ckan asset build
 
 # echo "Setting permissions for datastore"
-# ckan datastore set-permissions | psql $(grep ckan.datastore.write_url ckan.ini | awk -F= '{print $2}')
+ckan datastore set-permissions | psql $(grep ckan.datastore.write_url ckan.ini | awk -F= '{print $2}')
 
 # Start supervisor
 echo "Supervisor start"
