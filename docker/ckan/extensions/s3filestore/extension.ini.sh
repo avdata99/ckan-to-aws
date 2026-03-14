@@ -3,6 +3,7 @@ echo "Configuring s3filestore extension"
 
 ckan config-tool ${CKAN_INI} "ckanext.s3filestore.aws_bucket_name = ${S3FILESTORE_AWS_BUCKET_NAME}"
 ckan config-tool ${CKAN_INI} "ckanext.s3filestore.region_name = ${S3FILESTORE_REGION_NAME}"
+ckan config-tool ${CKAN_INI} "ckanext.s3filestore.host_name = s3.${S3FILESTORE_REGION_NAME}.amazonaws.com"
 ckan config-tool ${CKAN_INI} "ckanext.s3filestore.signature_version = s3v4"
 ckan config-tool ${CKAN_INI} "ckanext.s3filestore.aws_access_key_id = ${S3FILESTORE_AWS_ACCESS_KEY_ID}"
 ckan config-tool ${CKAN_INI} "ckanext.s3filestore.aws_secret_access_key = ${S3FILESTORE_AWS_SECRET_ACCESS_KEY}"
