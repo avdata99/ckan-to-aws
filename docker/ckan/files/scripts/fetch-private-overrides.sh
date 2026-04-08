@@ -28,7 +28,7 @@
 # cat ~/.ssh/ckan_private_repo_deploy_key | base64 -w 0
 
 echo "================================================"
-echo "Fetching private project overrides..."
+echo "Fetching private project overrides ..."
 echo "================================================"
 
 # ---------------------------------------------------------------------------
