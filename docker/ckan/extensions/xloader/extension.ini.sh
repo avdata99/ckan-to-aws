@@ -7,3 +7,5 @@
 # ckan config-tool ${CKAN_INI} "ckanext.xloader.jobs_db.uri = ${SQLALCHEMY_URL}"
 
 ckan config-tool ${CKAN_INI} "ckanext.xloader.max_content_length = 10000000"
+ckan config-tool ${CKAN_INI} "ckanext.xloader.show_badges = false"
+ckan config-tool ${CKAN_INI} "ckanext.xloader.debug_badges = false"
