@@ -272,6 +272,9 @@ Since ECS Fargate doesn't support traditional SSH, we use **ECS Exec** to run co
 ### Using the Script
 
 ```bash
+# Step 1: update credentials (they are temporary)
+# load env
+source scripts/tools/env-setup.sh
 # Open an interactive shell in the CKAN container
 ./scripts/tools/ecs-exec.sh
 
