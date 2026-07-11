@@ -93,13 +93,13 @@ if [ -f "$EXTENSIONS_LIST_FILE" ]; then
         
         EXTENSION_DIR="${APP_DIR}/extensions/$extension"
         AFTER_DB_UPGRADE_SCRIPT="$EXTENSION_DIR/extension.after-db-upgrade.sh"
-        
-        if [ -f "$ENTRYPOINT_SCRIPT" ]; then
-            echo "Running entrypoint after db upgrade script for $extension"
-            chmod +x "$ENTRYPOINT_SCRIPT"
-            bash "$ENTRYPOINT_SCRIPT"
+
+        if [ -f "$AFTER_DB_UPGRADE_SCRIPT" ]; then
+            echo "Running after db upgrade script for $extension"
+            chmod +x "$AFTER_DB_UPGRADE_SCRIPT"
+            bash "$AFTER_DB_UPGRADE_SCRIPT"
         else
-            echo "No entrypoint script found for $extension"
+            echo "No after db upgrade script found for $extension"
         fi
         
     done < "$EXTENSIONS_LIST_FILE"
